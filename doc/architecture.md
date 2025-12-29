@@ -7,10 +7,10 @@
 
 ```mermaid
 graph TD
-    Router[Router (Web)] -->|Calls| Usecase[Usecase (App/Logic)]
-    Usecase -->|Uses| Domain[Domain (Entity)]
-    Usecase -->|Calls I/F| RepositoryIF[Repository Interface]
-    Infrastructure[Infrastructure (DB)] -->|Implements| RepositoryIF
+    Router["Router (Web)"] -->|Calls| Usecase["Usecase (App/Logic)"]
+    Usecase -->|Uses| Domain["Domain (Entity)"]
+    Usecase -->|Calls I/F| RepositoryIF["Repository Interface"]
+    Infrastructure["Infrastructure (DB)"] -->|Implements| RepositoryIF
 ```
 
 ## 各レイヤーの責務
