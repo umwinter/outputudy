@@ -61,5 +61,21 @@ class PostService:
             post = self.post_repo.create(post_data)
             self.image_repo.create_bulk(images, post_id=post.id)
             self.file_repo.save(zip_file, post_id=post.id)
-        # ここでコミット
 ```
+
+## Service の命名規則 (Guidelines)
+基本的には **「扱うリソース（ドメイン概念）の集合」** に基づいて命名します。
+DBのテーブルと 1:1 である必要はありません。
+
+### 推奨パターン
+- **リソースベース**: `UserService` (ユーザー管理), `PostService` (記事管理)
+    - 最も一般的。CRUD が中心の場合に自然です。
+- **機能ベース**: `AuthService` (認証), `NotificationService` (通知), `SearchService` (検索)
+    - 複数のリソース（テーブル）を横断する機能の場合、機能名でサービスを作ります。
+    - 例: `AuthService` は、`User` テーブルだけでなく `Session` や `AuditLog` テーブルも扱うかもしれません。
+
+### アンチパターン
+- **テーブル名そのまま**: `UserTableService`, `MtmUserRelService`
+    - 実装詳細が漏れています。「何をするか」に注目すべきです。
+- **巨大な神クラス**: `ManagerService`, `AppService`
+    - 責務が不明瞭になり、何でも屋になってしまいます。分けましょう。
