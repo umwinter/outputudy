@@ -65,6 +65,15 @@ services:
     volumes:
       - mailpit_data:/data
 
+  document:
+    build:
+      context: ./doc
+      dockerfile: Dockerfile
+    ports:
+      - "${DOC_PORT:-8001}:8000"
+    volumes:
+      - ./doc:/docs
+
   dozzle:
     image: amir20/dozzle
     volumes:

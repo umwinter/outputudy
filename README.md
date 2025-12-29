@@ -39,3 +39,20 @@ source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
+
+### Documentation
+ドキュメントサーバーは `http://localhost:8001` で起動します。
+
+- **URL**: [http://localhost:8001](http://localhost:8001)
+- **機能**: Project Docs + API Reference (Swagger UI & ReDoc)
+- **OpenAPI Update**:
+  Backend の変更をドキュメントに反映するには、以下のコマンドで定義ファイル (`doc/src/openapi.json`) を更新してください。
+  ```bash
+  docker-compose run --rm --entrypoint "" document python /docs/scripts/generate_static.py
+  ```
+
+> [!NOTE] Specification
+> 開発環境 (`docker-compose up`) では `mkdocs serve` が動作しており、ドキュメントのビルドはメモリ上で行われます。
+> そのため、`doc/site` ディレクトリにはファイルが出力されません。
+> 静的ファイルとして出力したい場合（デプロイ用など）は、明示的にビルドを実行してください：
+> `docker-compose run --rm document mkdocs build`

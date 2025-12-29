@@ -1,2 +1,3 @@
 # MkDocs built site
 site/
+src/openapi.json

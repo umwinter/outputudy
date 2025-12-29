@@ -1,3 +1,7 @@
+---
+hide:
+  - toc
+---
 # API Reference
 
-::: main
+<swagger-ui src="/openapi.json"/>

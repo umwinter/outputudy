@@ -8,4 +8,7 @@ WORKDIR /app
 # Let's use corepack which is standard in Node images now.
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+
 CMD ["pnpm", "dev"]

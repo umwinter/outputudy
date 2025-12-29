@@ -3,19 +3,17 @@ docs_dir: src
 site_dir: site
 
 nav:
-  - Home: context.md
+  - Home: index.md
+  - Context: context.md
   - Architecture: architecture.md
   - Workflow: workflow.md
-  - API Reference: api.md
+  - API (Swagger): api.md
+  - API (ReDoc): api_redoc.md
 
 theme:
   name: material
 
 plugins:
-  - mkdocstrings:
-      handlers:
-        python:
-          paths: [../backend]
+  - swagger-ui-tag
+  - redoc-tag
 
-watch:
-  - ../backend
