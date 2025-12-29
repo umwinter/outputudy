@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from typing import List
-from backend.app.service.user_service import UserService
-from backend.app.infrastructure.repository.user_repository import InMemoryUserRepository
-from backend.app.domain.models import User
+from app.service.user_service import UserService
+from app.infrastructure.repository.user_repository import InMemoryUserRepository
+from app.domain.models import User
 
 router = APIRouter()
 

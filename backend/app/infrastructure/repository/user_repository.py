@@ -1,6 +1,6 @@
 from typing import List, Optional
-from backend.app.domain.models import User
-from backend.app.domain.repository import UserRepository
+from app.domain.models import User
+from app.domain.repository import UserRepository
 
 class InMemoryUserRepository(UserRepository):
     def __init__(self):

@@ -1,6 +1,6 @@
 from typing import List
-from backend.app.domain.models import User
-from backend.app.domain.repository import UserRepository
+from app.domain.models import User
+from app.domain.repository import UserRepository
 
 class UserService:
     def __init__(self, user_repo: UserRepository):
