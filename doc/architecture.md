@@ -7,9 +7,9 @@
 
 ```mermaid
 graph TD
-    Router["Router (Web)"] -->|Calls| Usecase["Usecase (App/Logic)"]
-    Usecase -->|Uses| Domain["Domain (Entity)"]
-    Usecase -->|Calls I/F| RepositoryIF["Repository Interface"]
+    Router["Router (Web)"] -->|Calls| Service["Service (App/Logic)"]
+    Service -->|Uses| Domain["Domain (Entity)"]
+    Service -->|Calls I/F| RepositoryIF["Repository Interface"]
     Infrastructure["Infrastructure (DB)"] -->|Implements| RepositoryIF
 ```
 
@@ -19,11 +19,11 @@ graph TD
 - **役割**: HTTP リクエストのハンドリング。
 - **責務**:
     - リクエストデータのバリデーション（Pydantic）
-    - Usecase の呼び出し
+    - Service の呼び出し
     - レスポンスの整形
 - **ルール**: ビジネスロジックを含まない。
 
-### 2. Usecase (`backend/app/usecase/`)
+### 2. Service (`backend/app/service/`)
 - **役割**: アプリケーションの機能単位、およびビジネスルールの実装。
 - **責務**:
     - アプリケーションの処理フロー制御

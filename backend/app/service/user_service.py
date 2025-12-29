@@ -2,7 +2,7 @@ from typing import List
 from backend.app.domain.models import User
 from backend.app.domain.repository import UserRepository
 
-class UserUsecase:
+class UserService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
 
