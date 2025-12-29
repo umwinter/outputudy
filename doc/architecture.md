@@ -43,3 +43,23 @@ graph TD
 - **責務**:
     - Repository Interface の実装（SQLAlchemy, API Client 等）
     - 外部システムとの通信
+
+## トランザクション管理とサービスの粒度
+「投稿 (Post) と一緒に画像 (Image) やファイル (Zip) を保存する」といった複合的な処理の場合：
+
+1.  **Service の粒度**: **「1つのユースケース（ユーザーの意図） = 1つの Service メソッド」** となります。
+    *   例: `PostService.create_full_post(...)`
+    *   Router から ImageService, FileService を個別に呼ぶのではなく、PostService が責任を持ちます。
+2.  **トランザクション**: **Service 層がトランザクションの境界**となります。
+    *   Service メソッド内で、`PostRepository.save()`, `ImageRepository.save()` などを連続して呼び出し、全て成功したらコミット、失敗したらロールバックします（Atomicity）。
+
+```python
+# 擬似コード例
+class PostService:
+    def create_full_post(self, post_data, images, zip_file):
+        with self.uow.begin():  # トランザクション開始
+            post = self.post_repo.create(post_data)
+            self.image_repo.create_bulk(images, post_id=post.id)
+            self.file_repo.save(zip_file, post_id=post.id)
+        # ここでコミット
+```
