@@ -17,8 +17,15 @@ Gemini (AI) をメインの開発者として活用する場合、**ユーザー
 - 実装完了後に Gemini が提示する **「実施報告書 (`walkthrough.md`)」 と実際のアプリ**を確認してください。
 - **チェックポイント**:
     - 実際に動かしてみて、違和感がないか？
-    - バグや未実装の考慮漏れがないか？
     - デザインは意図通りか？
+
+## ブランチ戦略 (Branching Strategy)
+**GitHub Flow** をベースとしたシンプルな構成を採用します。
+
+- **`main`**: 常に利用可能な状態を保つデフォルトブランチ。
+- **`feature/xxx`**: 各タスク（GitHub Issue）ごとに作成する作業用ブランチ。
+    - 命名規則: `feature/<issue-number>-<short-description>` (例: `feature/12-add-login`)
+    - Gemini が Issue に着手する際に作成し、Pull Request (PR) を通じて `main` にマージします。
 
 ---
 
