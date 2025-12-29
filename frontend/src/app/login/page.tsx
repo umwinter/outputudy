@@ -24,6 +24,10 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 
+import { login } from "./actions";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 const formSchema = z.object({
     email: z.string().email({
         message: "Please enter a valid email address.",
@@ -34,6 +38,9 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
+    const router = useRouter();
+    const [error, setError] = useState<string | undefined>("");
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -42,9 +49,16 @@ export default function LoginPage() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // TODO: Implement login logic
-        console.log(values);
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        setError("");
+        const result = await login(values);
+
+        if (result?.error) {
+            setError(result.error);
+        } else if (result?.success) {
+            router.push("/home");
+            router.refresh(); // Update auth state
+        }
     }
 
     return (
@@ -93,6 +107,11 @@ export default function LoginPage() {
                                     </FormItem>
                                 )}
                             />
+                            {error && (
+                                <div className="text-sm font-medium text-destructive">
+                                    {error}
+                                </div>
+                            )}
                             <Button type="submit" className="w-full">
                                 Sign in
                             </Button>

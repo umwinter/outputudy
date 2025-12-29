@@ -11,6 +11,7 @@ services:
       - /app/.next
     environment:
       - NODE_ENV=development
+      - AUTH_SECRET=${AUTH_SECRET}
     command: pnpm dev
     tty: true
 
@@ -27,6 +28,7 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=outputudy
+      - AUTH_SECRET=${AUTH_SECRET}
     depends_on:
       db:
         condition: service_healthy
