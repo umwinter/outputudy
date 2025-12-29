@@ -23,10 +23,10 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/postudy
+      - DATABASE_URL=postgresql://user:password@db:5432/outputudy
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=postudy
+      - POSTGRES_DB=outputudy
     depends_on:
       db:
         condition: service_healthy
@@ -38,11 +38,11 @@ services:
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=postudy
+      - POSTGRES_DB=outputudy
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d postudy"]
+      test: [ "CMD-SHELL", "pg_isready -U user -d outputudy" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -78,9 +78,9 @@ services:
       dockerfile: Dockerfile
     # This service is for running migrations manually or via CI/CD
     # It shares the same context/image as backend but is ephemeral
-    profiles: ["tools"]
+    profiles: [ "tools" ]
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/postudy
+      - DATABASE_URL=postgresql://user:password@db:5432/outputudy
     depends_on:
       db:
         condition: service_healthy
