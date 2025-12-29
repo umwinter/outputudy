@@ -3,8 +3,5 @@
 .vscode/
 .idea/
 
-# Root Tools
-_legacy_backup/
-
 # Env files (Root level)
 .env
