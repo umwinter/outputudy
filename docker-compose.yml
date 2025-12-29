@@ -1,0 +1,91 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+    command: pnpm dev
+    tty: true
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/postudy
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postudy
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postudy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d postudy"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    depends_on:
+      - db
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025" # UI
+      - "${MAILPIT_SMTP_PORT:-1025}:1025" # SMTP
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATA_FILE: /data/mailpit.db
+    volumes:
+      - mailpit_data:/data
+
+  dozzle:
+    image: amir20/dozzle
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${DOZZLE_PORT:-8888}:8080"
+
+  migration:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # This service is for running migrations manually or via CI/CD
+    # It shares the same context/image as backend but is ephemeral
+    profiles: ["tools"]
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/postudy
+    depends_on:
+      db:
+        condition: service_healthy
+    command: echo "Run 'docker-compose run --rm migration alembic upgrade head' to migrate"
+
+volumes:
+  postgres_data:
+  mailpit_data:

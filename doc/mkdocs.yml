@@ -1,0 +1,19 @@
+site_name: Postudy Documentation
+docs_dir: src
+site_dir: site
+
+nav:
+  - Home: context.md
+  - API Reference: api.md
+
+theme:
+  name: material
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [../backend]
+
+watch:
+  - ../backend
