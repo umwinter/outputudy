@@ -77,5 +77,40 @@ DBのテーブルと 1:1 である必要はありません。
 ### アンチパターン
 - **テーブル名そのまま**: `UserTableService`, `MtmUserRelService`
     - 実装詳細が漏れています。「何をするか」に注目すべきです。
-- **巨大な神クラス**: `ManagerService`, `AppService`
     - 責務が不明瞭になり、何でも屋になってしまいます。分けましょう。
+
+## レイヤー別ガイドライン (Guidelines per Layer)
+
+各レイヤーの命名規則、ディレクトリ構造、粒度についての指針です。
+
+### 1. Router (`backend/app/router/`)
+- **命名規則**: `[resource_name]_router.py` (例: `user_router.py`, `post_router.py`)
+- **粒度**: **リソース単位** (URLのパスベース)
+    - `/users` 以下のエンドポイントは `user_router.py` にまとめる。
+- **実装ルール**:
+    - ロジックを書かない。`Service` を呼ぶだけにする。
+    - `Response Model` (Pydantic) を必ず指定する。
+
+### 2. Service (`backend/app/service/`)
+- **命名規則**: `[Resource/Feature]Service` (ファイル名: `[resource]_service.py`)
+    - 例: `UserService` (CRUD等), `AuthService` (機能)
+- **粒度**: **ユースケースの集合**
+    - 「記事を投稿する」「記事を削除する」など、関連するユースケースをひとまとめにする。
+    - **DBテーブルと 1:1 にする必要はない** (重要)。
+- **実装ルール**:
+    - **トランザクション境界** はここ。
+    - 複数の Repository を組み合わせて業務ロジックを完結させる。
+
+### 3. Domain (`backend/app/domain/`)
+- **モデル**: `models.py` (または `domain/models/[resource].py`)
+    - Pydantic BaseModel や dataclass を使用。
+    - DBの都合（外部キー制約の設定など）ではなく、アプリでどうデータを扱うかを定義する。
+- **リポジトリI/F**: `repository.py` (または `domain/repository/[resource]_repository.py`)
+    - **命名**: `[Resource]Repository`
+    - `save(user)`, `find_by_id(id)` など、**技術に依存しないメソッド** を定義する。
+
+### 4. Infrastructure (`backend/app/infrastructure/`)
+- **リポジトリ実装**: `infrastructure/repository/[resource]_repository.py`
+    - **命名**: `[Tech]RepositoryImpl` や、単に `[Resource]Repository` (実装クラス)
+    - Domain 層で定義したインターフェースを継承し、SQLAlchemy 等で実装する。
+- **その他**: `email_client.py`, `s3_storage.py` など、外部システムとの連携クラス。
