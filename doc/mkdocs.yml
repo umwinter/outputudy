@@ -4,6 +4,8 @@ site_dir: site
 
 nav:
   - Home: context.md
+  - Architecture: architecture.md
+  - Workflow: workflow.md
   - API Reference: api.md
 
 theme:
