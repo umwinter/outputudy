@@ -2,7 +2,8 @@ from app.infrastructure.database import SessionLocal
 from app.infrastructure.orm_models import UserORM
 from app.infrastructure.security import get_password_hash
 
-def seed_user():
+
+def seed_user() -> None:
     db = SessionLocal()
     try:
         # Check if user already exists
@@ -11,7 +12,7 @@ def seed_user():
             new_user = UserORM(
                 name="Test User",
                 email="m@example.com",
-                hashed_password=get_password_hash("password")
+                hashed_password=get_password_hash("password"),
             )
             db.add(new_user)
             db.commit()
@@ -20,6 +21,7 @@ def seed_user():
             print("User already exists.")
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     seed_user()

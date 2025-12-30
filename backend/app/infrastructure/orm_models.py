@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String
+
 from app.infrastructure.database import Base
+
 
 class UserORM(Base):
     __tablename__ = "users"
