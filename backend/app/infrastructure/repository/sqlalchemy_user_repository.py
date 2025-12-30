@@ -14,9 +14,11 @@ class SQLAlchemyUserRepository(UserRepository):
             return User.model_validate(user_orm)
         return None
 
-    def get_user_by_email(self, email: str) -> Optional[UserORM]:
-        # We need the ORM model here to access the hashed_password for verification
-        return self.db.query(UserORM).filter(UserORM.email == email).first()
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        user_orm = self.db.query(UserORM).filter(UserORM.email == email).first()
+        if user_orm:
+            return User.model_validate(user_orm)
+        return None
 
     def list_users(self) -> List[User]:
         users_orm = self.db.query(UserORM).all()
