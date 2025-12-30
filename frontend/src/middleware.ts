@@ -1,9 +1,37 @@
 import { auth } from "@/auth"
 
+import {
+    DEFAULT_LOGIN_REDIRECT,
+    apiAuthPrefix,
+    authRoutes,
+    publicRoutes,
+} from "@/routes";
+
 export default auth((req) => {
-    // req.auth
-    const isLoggedIn = !!req.auth
-    console.log("Middleware: isLoggedIn:", isLoggedIn, "Path:", req.nextUrl.pathname)
+    const isLoggedIn = !!req.auth;
+    const { pathname } = req.nextUrl;
+
+    // Check routes against config
+    const isApiAuthRoute = pathname.startsWith(apiAuthPrefix);
+    const isPublicRoute = publicRoutes.includes(pathname);
+    const isAuthRoute = authRoutes.includes(pathname);
+
+    if (isApiAuthRoute) {
+        return;
+    }
+
+    if (isAuthRoute) {
+        if (isLoggedIn) {
+            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, req.nextUrl));
+        }
+        return;
+    }
+
+    if (!isLoggedIn && !isPublicRoute) {
+        return Response.redirect(new URL("/login", req.nextUrl));
+    }
+
+    return;
 })
 
 // Optionally, don't invoke Middleware on some paths
