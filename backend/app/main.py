@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from app.router import user_router
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.router import auth_router, user_router
 
 app = FastAPI()
-
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -13,9 +13,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user_router.router, prefix="/api")
+app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
+app.include_router(user_router.router, prefix="/api", tags=["users"])
+
 
 @app.get("/")
-def read_root():
+def read_root() -> dict[str, str]:
     return {"Hello": "World"}
-

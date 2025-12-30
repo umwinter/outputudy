@@ -1,0 +1,50 @@
+repos:
+  - repo: local
+    hooks:
+      # --- Backend Hooks (Pre-commit) ---
+      - id: ruff-check
+        name: backend ruff check
+        entry: docker-compose exec -T backend ruff check --fix
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: ruff-format
+        name: backend ruff format
+        entry: docker-compose exec -T backend ruff format
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      # --- Frontend Hooks (Pre-commit) ---
+      - id: frontend-format
+        name: frontend prettier format
+        entry: docker-compose exec -T frontend pnpm format
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+
+      - id: frontend-lint
+        name: frontend eslint
+        entry: docker-compose exec -T frontend pnpm lint
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      # --- Backend Hooks (Pre-push) ---
+      - id: backend-type-check
+        name: backend mypy
+        entry: docker-compose exec -T backend mypy .
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+
+      # --- Frontend Hooks (Pre-push) ---
+      - id: frontend-type-check
+        name: frontend type-check
+        entry: docker-compose exec -T frontend pnpm type-check
+        language: system
+        stages: [pre-push]
+        pass_filenames: false

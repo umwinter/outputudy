@@ -24,21 +24,37 @@
 
 ## セットアップ
 
-### Frontend
+### クイックスタート (推奨)
+
+プロジェクトのルートディレクトリで以下のコマンドを実行してください。環境変数の設定、Docker コンテナの起動、データベースの初期化、Git Hooks のインストールを自動で行います。
+
 ```bash
-cd frontend
-pnpm install
-pnpm dev
+make setup
 ```
 
-### Backend
+または直接スクリプトを実行することも可能です：
+
 ```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --reload
+./scripts/setup.sh
 ```
+
+### 開発用コマンド (Makefile)
+
+日常的な操作には `Makefile` のコマンドを利用できます：
+
+| コマンド | 内容 |
+| :--- | :--- |
+| `make dev` | Docker コンテナを起動します (バックグラウンド) |
+| `make stop` | Docker コンテナを停止します |
+| `make ps` | コンテナのステータスを確認します |
+| `make logs` | コンテナのログを表示します |
+| `make lint` | バックエンド/フロントエンドの Lint チェックを実行します |
+| `make format` | コードの自動フォーマットを実行します |
+| `make type-check` | 静的型チェックを実行します |
+
+---
+
+### 個別セットアップ (開発者向け)
 
 ### Documentation
 ドキュメントサーバーは `http://localhost:8001` で起動します。
@@ -54,5 +70,3 @@ uvicorn main:app --reload
 > [!NOTE] Specification
 > 開発環境 (`docker-compose up`) では `mkdocs serve` が動作しており、ドキュメントのビルドはメモリ上で行われます。
 > そのため、`doc/site` ディレクトリにはファイルが出力されません。
-> 静的ファイルとして出力したい場合（デプロイ用など）は、明示的にビルドを実行してください：
-> `docker-compose run --rm document mkdocs build`
