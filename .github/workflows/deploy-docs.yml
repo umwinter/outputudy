@@ -1,0 +1,42 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - feat/auth-system # For testing during development
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install mkdocs-material mkdocs-swagger-ui-tag mkdocs-redoc-tag
+
+      - name: Export OpenAPI Schema
+        run: |
+          cd backend
+          export PYTHONPATH=$PYTHONPATH:.
+          python scripts/export_openapi.py
+          mv openapi.json ../doc/src/openapi.json
+
+      - name: Build Documentation
+        run: |
+          cd doc
+          mkdocs build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/site
