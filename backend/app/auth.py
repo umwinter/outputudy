@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 import os
-from jose import jwt, JWTError
+from sqlalchemy.orm import Session
+from app.infrastructure.database import get_db
+from app.infrastructure.repository.sqlalchemy_user_repository import SQLAlchemyUserRepository
+from app.infrastructure.security import verify_password
 
 router = APIRouter()
 
@@ -17,15 +20,21 @@ class LoginResponse(BaseModel):
     email: str
 
 @router.post("/login", response_model=LoginResponse)
-async def login(request: LoginRequest):
-    # Mock authentication
-    if request.email and request.password == "password":
-        return {
-            "id": "1",
-            "name": "User",
-            "email": request.email
-        }
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+async def login(request: LoginRequest, db: Session = Depends(get_db)):
+    repo = SQLAlchemyUserRepository(db)
+    user_orm = repo.get_user_by_email(request.email)
+    
+    if not user_orm:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(request.password, user_orm.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+    return {
+        "id": str(user_orm.id),
+        "name": user_orm.name,
+        "email": user_orm.email
+    }
 
 # Dependency for protected routes
 async def verify_token(token: str):
