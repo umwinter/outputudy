@@ -70,5 +70,3 @@ make setup
 > [!NOTE] Specification
 > 開発環境 (`docker-compose up`) では `mkdocs serve` が動作しており、ドキュメントのビルドはメモリ上で行われます。
 > そのため、`doc/site` ディレクトリにはファイルが出力されません。
-> 静的ファイルとして出力したい場合（デプロイ用など）は、明示的にビルドを実行してください：
-> `docker-compose run --rm document mkdocs build`
