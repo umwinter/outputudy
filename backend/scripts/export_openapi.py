@@ -4,7 +4,7 @@ import os
 from app.main import app
 
 
-def export_openapi():
+def export_openapi() -> None:
     # Use FastAPI's utility to get the JSON schema
     openapi_schema = app.openapi()
 
