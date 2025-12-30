@@ -1,8 +1,11 @@
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
 from app.infrastructure.orm_models import UserORM
 from app.infrastructure.security import get_password_hash
 
 
-def test_login_success(client, db_session):
+def test_login_success(client: TestClient, db_session: Session) -> None:
     # Setup test user
     password = "testpassword"
     user = UserORM(
@@ -28,7 +31,7 @@ def test_login_success(client, db_session):
     assert data["token_type"] == "bearer"
 
 
-def test_login_wrong_password(client, db_session):
+def test_login_wrong_password(client: TestClient, db_session: Session) -> None:
     # Setup test user
     password = "testpassword"
     user = UserORM(
@@ -49,7 +52,7 @@ def test_login_wrong_password(client, db_session):
     assert response.json()["detail"] == "Invalid credentials"
 
 
-def test_login_nonexistent_user(client):
+def test_login_nonexistent_user(client: TestClient) -> None:
     response = client.post(
         "/api/auth/login",
         json={"email": "nonexistent@example.com", "password": "any_password"},
@@ -59,7 +62,7 @@ def test_login_nonexistent_user(client):
     assert response.json()["detail"] == "Invalid credentials"
 
 
-def test_read_users_me_success(client, db_session):
+def test_read_users_me_success(client: TestClient, db_session: Session) -> None:
     # Setup test user
     password = "testpassword"
     user = UserORM(
@@ -85,6 +88,6 @@ def test_read_users_me_success(client, db_session):
     assert data["name"] == "Auth User"
 
 
-def test_read_users_me_unauthorized(client):
+def test_read_users_me_unauthorized(client: TestClient) -> None:
     response = client.get("/api/auth/me")
     assert response.status_code == 401

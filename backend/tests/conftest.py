@@ -1,9 +1,10 @@
 import os
+from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.infrastructure.database import Base, get_db
 
@@ -38,7 +39,7 @@ def engine():
 
 
 @pytest.fixture
-def db_session(engine):
+def db_session(engine: Engine) -> Generator[Session, None, None]:
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = SessionLocal()
     try:
@@ -48,7 +49,7 @@ def db_session(engine):
 
 
 @pytest.fixture
-def client(db_session):
+def client(db_session: Session) -> Generator[TestClient, None, None]:
     def override_get_db():
         try:
             yield db_session
