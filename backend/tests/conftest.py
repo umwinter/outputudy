@@ -13,13 +13,13 @@ from app.infrastructure.orm_models import UserORM  # noqa: F401
 from app.main import app
 
 
-def get_worker_id():
+def get_worker_id() -> str:
     # gw0, gw1, etc. if running with xdist
     return os.environ.get("PYTEST_XDIST_WORKER", "master")
 
 
 @pytest.fixture(scope="session")
-def engine():
+def engine() -> Generator[Engine, None, None]:
     worker_id = get_worker_id()
     db_path = f"test_{worker_id}.db"
     database_url = f"sqlite:///./{db_path}"
@@ -50,7 +50,7 @@ def db_session(engine: Engine) -> Generator[Session, None, None]:
 
 @pytest.fixture
 def client(db_session: Session) -> Generator[TestClient, None, None]:
-    def override_get_db():
+    def override_get_db() -> Generator[Session, None, None]:
         try:
             yield db_session
         finally:

@@ -46,9 +46,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // access_token exists on our backend response
+        // @ts-expect-error - access_token exists on our backend response
         token.accessToken = user.access_token;
-        // @ts-expect-error - id exists on our backend response
+        // id exists on our backend response
         token.id = user.id;
       }
       return token;

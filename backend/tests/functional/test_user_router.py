@@ -1,4 +1,7 @@
-def test_list_users(client):
+from fastapi.testclient import TestClient
+
+
+def test_list_users(client: TestClient) -> None:
     # Currently uses InMemoryUserRepository which has 2 users by default
     response = client.get("/api/users")
     assert response.status_code == 200
@@ -7,13 +10,13 @@ def test_list_users(client):
     assert data[0]["name"] == "Alice"
 
 
-def test_get_user_success(client):
+def test_get_user_success(client: TestClient) -> None:
     response = client.get("/api/users/1")
     assert response.status_code == 200
     assert response.json()["name"] == "Alice"
 
 
-def test_get_user_not_found(client):
+def test_get_user_not_found(client: TestClient) -> None:
     response = client.get("/api/users/999")
     # Current implementation returns null for nonexistent users with 200 OK
     assert response.status_code == 200
