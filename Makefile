@@ -1,4 +1,4 @@
-.PHONY: setup dev stop build ps logs lint format type-check clean
+.PHONY: setup dev stop build ps logs lint format type-check test clean
 
 # Default target
 all: dev
@@ -47,6 +47,13 @@ type-check:
 	docker-compose exec backend mypy .
 	@echo "⌨️ Checking Frontend Types (TSC)..."
 	docker-compose exec frontend pnpm type-check
+
+# Run all tests in parallel
+test:
+	@echo "🧪 Running Backend Tests (Parallel)..."
+	docker-compose exec backend pytest -n auto
+	@echo "🧪 Running Frontend Tests..."
+	docker-compose exec frontend pnpm test
 
 # Clean up temporary files
 clean:

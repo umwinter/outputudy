@@ -2,10 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
+from app.domain.models import User as UserDomain
+from app.infrastructure.auth_middleware import get_current_user
 from app.infrastructure.database import get_db
 from app.infrastructure.repository.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
+from app.infrastructure.security import create_access_token
 from app.service.auth_service import AuthService
 
 router = APIRouter()
@@ -20,6 +23,8 @@ class LoginResponse(BaseModel):
     id: str
     name: str
     email: str
+    access_token: str
+    token_type: str = "bearer"
 
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
@@ -35,10 +40,23 @@ async def login(
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    return {"id": str(user.id), "name": user.name, "email": user.email}
+    access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
+
+    return {
+        "id": str(user.id),
+        "name": user.name,
+        "email": user.email,
+        "access_token": access_token,
+    }
 
 
-@router.get("/me")
-async def read_users_me() -> dict[str, str]:
-    # Placeholder for current user logic
-    return {"user_id": "1", "email": "mock@example.com"}
+@router.get("/me", response_model=LoginResponse)
+async def read_users_me(
+    current_user: UserDomain = Depends(get_current_user),
+) -> dict[str, str]:
+    return {
+        "id": str(current_user.id),
+        "name": current_user.name,
+        "email": current_user.email,
+        "access_token": "N/A",  # Token is not re-issued here for now
+    }

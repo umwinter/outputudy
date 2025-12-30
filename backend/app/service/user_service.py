@@ -10,4 +10,4 @@ class UserService:
         return self.user_repo.list_users()
 
     def get_user_by_id(self, user_id: int) -> User | None:
-        return self.user_repo.get_user(user_id)
+        return self.user_repo.get_user_by_id(user_id)

@@ -14,3 +14,6 @@ types-python-jose
 types-passlib
 pytest>=8.0.0
 httpx>=0.27.0
+pytest-xdist>=3.5.0
+pytest-asyncio>=0.23.0
+python-jose[cryptography]>=3.3.0

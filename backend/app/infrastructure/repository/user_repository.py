@@ -9,7 +9,7 @@ class InMemoryUserRepository(UserRepository):
             User(id=2, name="Bob", email="bob@example.com"),
         ]
 
-    def get_user(self, user_id: int) -> User | None:
+    def get_user_by_id(self, user_id: int) -> User | None:
         for user in self._users:
             if user.id == user_id:
                 return user

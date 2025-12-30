@@ -35,3 +35,8 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "app.migrations.*"
 ignore_errors = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"

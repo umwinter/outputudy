@@ -3,10 +3,12 @@ import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
   providers: [
     Credentials({
-      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-      // e.g. domain, username, password, 2FA token, etc.
       credentials: {
         email: {},
         password: {},
@@ -30,6 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (!res.ok) return null;
 
             const user = await res.json();
+            // user object now contains access_token from backend
             return user;
           } catch (e) {
             console.error(e);
@@ -40,6 +43,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        // @ts-expect-error - access_token exists on our backend response
+        token.accessToken = user.access_token;
+        // @ts-expect-error - id exists on our backend response
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        // @ts-expect-error - accessToken exists on token
+        session.accessToken = token.accessToken;
+        // @ts-expect-error - id exists on user
+        session.user.id = token.id;
+      }
+      return session;
+    },
+  },
   pages: {
     signIn: "/login",
   },

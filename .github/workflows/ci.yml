@@ -36,7 +36,7 @@ jobs:
         run: mypy .
 
       - name: Run tests
-        run: pytest
+        run: pytest -n auto
 
   frontend:
     name: Frontend CI
