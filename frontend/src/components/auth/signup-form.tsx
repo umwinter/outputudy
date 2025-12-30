@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -17,36 +16,53 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { login } from "@/actions/auth";
+import { register } from "@/actions/auth";
 
-const formSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(1, {
-    message: "Password is required.",
-  }),
-});
+const formSchema = z
+  .object({
+    name: z.string().min(1, {
+      message: "Name is required.",
+    }),
+    email: z.string().email({
+      message: "Please enter a valid email address.",
+    }),
+    password: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
+    confirmPassword: z.string().min(1, {
+      message: "Please confirm your password.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
-export function LoginForm() {
+export function SignUpForm() {
   const router = useRouter();
   const [error, setError] = useState<string | undefined>("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setError("");
-    const result = await login(values);
+    const result = await register({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+    });
 
-    if (result?.error) {
+    if (result && "error" in result) {
       setError(result.error);
-    } else if (result?.success) {
+    } else {
       router.push("/home");
       router.refresh();
     }
@@ -55,6 +71,19 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="John Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="email"
@@ -73,15 +102,20 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <div className="flex items-center justify-between">
-                <FormLabel>Password</FormLabel>
-                <Link
-                  href="/forgot-password"
-                  className="text-primary text-sm font-medium hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
               <FormControl>
                 <Input type="password" {...field} />
               </FormControl>
@@ -91,7 +125,7 @@ export function LoginForm() {
         />
         {error && <div className="text-destructive text-sm font-medium">{error}</div>}
         <Button type="submit" className="w-full">
-          Sign in
+          Create Account
         </Button>
       </form>
     </Form>

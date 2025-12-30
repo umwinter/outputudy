@@ -15,3 +15,11 @@ class UserRepository(ABC):
     @abstractmethod
     def get_user_by_email(self, email: str) -> User | None:
         pass
+
+    @abstractmethod
+    def create_user(self, name: str, email: str, hashed_password: str) -> User:
+        pass
+
+    @abstractmethod
+    def update_user_password(self, user_id: int, hashed_password: str) -> None:
+        pass

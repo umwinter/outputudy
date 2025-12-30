@@ -8,7 +8,7 @@ from app.infrastructure.database import get_db
 from app.infrastructure.repository.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
-from app.infrastructure.security import create_access_token
+from app.infrastructure.security import create_access_token, verify_access_token
 from app.service.auth_service import AuthService
 
 router = APIRouter()
@@ -25,6 +25,21 @@ class LoginResponse(BaseModel):
     email: str
     access_token: str
     token_type: str = "bearer"
+
+
+class RegisterRequest(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
@@ -60,3 +75,52 @@ async def read_users_me(
         "email": current_user.email,
         "access_token": "N/A",  # Token is not re-issued here for now
     }
+
+
+@router.post("/register", response_model=LoginResponse)
+async def register(
+    request: RegisterRequest, service: AuthService = Depends(get_auth_service)
+) -> dict[str, str]:
+    try:
+        user = service.register_user(request.name, request.email, request.password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
+
+    return {
+        "id": str(user.id),
+        "name": user.name,
+        "email": user.email,
+        "access_token": access_token,
+    }
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest, service: AuthService = Depends(get_auth_service)
+) -> dict[str, str]:
+    token = service.create_password_reset_token(request.email)
+    if token:
+        # In a real app, send actual email here.
+        # For now, token can be retrieved from backend logs for manual testing.
+        # In production, return 200 regardless of user existence.
+        pass
+
+    return {"detail": "If your email is registered, you will receive a reset link."}
+
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPasswordRequest, service: AuthService = Depends(get_auth_service)
+) -> dict[str, str]:
+    payload = verify_access_token(request.token)
+    if not payload or payload.get("type") != "password_reset":
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Invalid token")
+
+    service.reset_password(int(user_id), request.new_password)
+    return {"detail": "Password has been reset successfully."}

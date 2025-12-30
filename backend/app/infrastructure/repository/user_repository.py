@@ -23,3 +23,15 @@ class InMemoryUserRepository(UserRepository):
             if user.email == email:
                 return user
         return None
+
+    def create_user(self, name: str, email: str, hashed_password: str) -> User:
+        new_id = max(u.id for u in self._users) + 1 if self._users else 1
+        user = User(id=new_id, name=name, email=email, hashed_password=hashed_password)
+        self._users.append(user)
+        return user
+
+    def update_user_password(self, user_id: int, hashed_password: str) -> None:
+        for user in self._users:
+            if user.id == user_id:
+                user.hashed_password = hashed_password
+                return

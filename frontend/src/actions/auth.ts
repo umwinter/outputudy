@@ -28,3 +28,63 @@ export async function login(values: { email: string; password: string }) {
     throw error;
   }
 }
+export async function register(values: { name: string; email: string; password: string }) {
+  try {
+    const res = await fetch("http://backend:8000/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      return { error: errorData.detail || "Registration failed" };
+    }
+
+    // After registration, log the user in
+    return await login({ email: values.email, password: values.password });
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong!" };
+  }
+}
+
+export async function forgotPassword(values: { email: string }) {
+  try {
+    const res = await fetch("http://backend:8000/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      return { error: errorData.detail || "Request failed" };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong!" };
+  }
+}
+
+export async function resetPassword(values: { token: string; new_password: string }) {
+  try {
+    const res = await fetch("http://backend:8000/api/auth/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      return { error: errorData.detail || "Reset failed" };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong!" };
+  }
+}
