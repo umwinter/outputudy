@@ -9,23 +9,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LoginForm } from "@/components/auth/login-form";
+import { SignUpForm } from "@/components/auth/signup-form";
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Sign in</CardTitle>
-        <CardDescription>Enter your credentials to access your account</CardDescription>
+        <CardTitle className="text-2xl">Sign up</CardTitle>
+        <CardDescription>Create an account to get started</CardDescription>
       </CardHeader>
       <CardContent>
-        <LoginForm />
+        <SignUpForm />
       </CardContent>
       <CardFooter className="flex justify-center">
         <p className="text-muted-foreground text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-primary font-medium hover:underline">
-            Sign up
+          Already have an account?{" "}
+          <Link href="/login" className="text-primary font-medium hover:underline">
+            Sign in
           </Link>
         </p>
       </CardFooter>

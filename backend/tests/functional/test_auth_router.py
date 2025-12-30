@@ -91,3 +91,96 @@ def test_read_users_me_success(client: TestClient, db_session: Session) -> None:
 def test_read_users_me_unauthorized(client: TestClient) -> None:
     response = client.get("/api/auth/me")
     assert response.status_code == 401
+
+
+def test_register_success(client: TestClient, db_session: Session) -> None:
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "name": "New User",
+            "email": "new_user@example.com",
+            "password": "newpassword123",
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == "new_user@example.com"
+    assert data["name"] == "New User"
+    assert "access_token" in data
+
+
+def test_register_duplicate_email(client: TestClient, db_session: Session) -> None:
+    # Setup existing user
+    user = UserORM(
+        name="Existing User",
+        email="duplicate@example.com",
+        hashed_password=get_password_hash("password"),
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "name": "New User",
+            "email": "duplicate@example.com",
+            "password": "newpassword123",
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Email already registered"
+
+
+def test_forgot_password_success(client: TestClient, db_session: Session) -> None:
+    # Setup test user
+    user = UserORM(
+        name="Forgot User",
+        email="forgot@example.com",
+        hashed_password=get_password_hash("password"),
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    response = client.post(
+        "/api/auth/forgot-password",
+        json={"email": "forgot@example.com"},
+    )
+    assert response.status_code == 200
+    assert "receive a reset link" in response.json()["detail"]
+
+
+def test_reset_password_success(client: TestClient, db_session: Session) -> None:
+    # Setup test user
+    user = UserORM(
+        name="Reset User",
+        email="reset@example.com",
+        id=999,
+        hashed_password=get_password_hash("oldpassword"),
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    # Reset token is a JWT with type="password_reset" and sub=user_id.
+    # We can use the security infrastructure or just mock/generate it.
+    from datetime import timedelta
+
+    from app.infrastructure.security import create_access_token
+
+    token = create_access_token(
+        data={"sub": "999", "type": "password_reset"},
+        expires_delta=timedelta(minutes=15),
+    )
+
+    response = client.post(
+        "/api/auth/reset-password",
+        json={"token": token, "new_password": "newpassword456"},
+    )
+    assert response.status_code == 200
+    assert response.json()["detail"] == "Password has been reset successfully."
+
+    # Verify login with new password
+    login_res = client.post(
+        "/api/auth/login",
+        json={"email": "reset@example.com", "password": "newpassword456"},
+    )
+    assert login_res.status_code == 200
