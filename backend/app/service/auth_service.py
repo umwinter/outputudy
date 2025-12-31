@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from app.domain.email import EmailService
 from app.domain.models import User
 from app.domain.repository import UserRepository
 from app.infrastructure.security import (
@@ -10,8 +11,9 @@ from app.infrastructure.security import (
 
 
 class AuthService:
-    def __init__(self, user_repo: UserRepository):
+    def __init__(self, user_repo: UserRepository, email_service: EmailService):
         self.user_repo = user_repo
+        self.email_service = email_service
 
     async def authenticate_user(self, email: str, password: str) -> User | None:
         user = await self.user_repo.get_user_by_email(email)
@@ -33,9 +35,10 @@ class AuthService:
         hashed_password = get_password_hash(password)
         return await self.user_repo.create_user(name, email, hashed_password)
 
-    async def create_password_reset_token(self, email: str) -> str | None:
+    async def request_password_reset(self, email: str) -> None:
         user = await self.user_repo.get_user_by_email(email)
         if not user:
+            # Return silently to prevent user enumeration
             return None
 
         # Short-lived token for password reset (15 minutes)
@@ -43,7 +46,7 @@ class AuthService:
             data={"sub": str(user.id), "type": "password_reset"},
             expires_delta=timedelta(minutes=15),
         )
-        return token
+        await self.email_service.send_password_reset_email(email, token)
 
     async def reset_password(self, user_id: int, new_password: str) -> None:
         hashed_password = get_password_hash(new_password)

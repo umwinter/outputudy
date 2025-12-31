@@ -1,10 +1,16 @@
+import asyncio
 import os
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from app.infrastructure.database import Base, get_db
 
@@ -18,19 +24,30 @@ def get_worker_id() -> str:
     return os.environ.get("PYTEST_XDIST_WORKER", "master")
 
 
-@pytest.fixture(scope="session")
-def engine() -> Generator[Engine, None, None]:
+@pytest_asyncio.fixture(scope="session")
+def event_loop():
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def engine() -> AsyncGenerator[AsyncEngine, None]:
     worker_id = get_worker_id()
     db_path = f"test_{worker_id}.db"
-    database_url = f"sqlite:///./{db_path}"
+    database_url = f"sqlite+aiosqlite:///./{db_path}"
 
-    engine = create_engine(database_url, connect_args={"check_same_thread": False})
+    engine = create_async_engine(
+        database_url, connect_args={"check_same_thread": False}
+    )
 
-    # Ensure tables are created for the isolated test database
-    Base.metadata.create_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     yield engine
 
-    # Cleanup database file after session
+    await engine.dispose()
     try:
         if os.path.exists(db_path):
             os.remove(db_path)
@@ -38,23 +55,21 @@ def engine() -> Generator[Engine, None, None]:
         pass
 
 
-@pytest.fixture
-def db_session(engine: Engine) -> Generator[Session, None, None]:
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    session = SessionLocal()
-    try:
+@pytest_asyncio.fixture
+async def db_session(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
+    async_session = async_sessionmaker(
+        engine,
+        expire_on_commit=False,
+        class_=AsyncSession,
+    )
+    async with async_session() as session:
         yield session
-    finally:
-        session.close()
 
 
 @pytest.fixture
-def client(db_session: Session) -> Generator[TestClient, None, None]:
-    def override_get_db() -> Generator[Session, None, None]:
-        try:
-            yield db_session
-        finally:
-            pass
+def client(db_session: AsyncSession) -> Generator[TestClient, None, None]:
+    async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
+        yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:

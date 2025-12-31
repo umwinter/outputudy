@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.models import User as UserDomain
 from app.infrastructure.auth_middleware import get_current_user
 from app.infrastructure.database import get_db
+from app.infrastructure.email.console import ConsoleEmailService
 from app.infrastructure.repository.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
@@ -44,7 +45,8 @@ class ResetPasswordRequest(BaseModel):
 
 def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
     repo = SQLAlchemyUserRepository(db)
-    return AuthService(repo)
+    email_service = ConsoleEmailService()
+    return AuthService(repo, email_service)
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -102,13 +104,7 @@ async def register(
 async def forgot_password(
     request: ForgotPasswordRequest, service: AuthService = Depends(get_auth_service)
 ) -> dict[str, str]:
-    token = await service.create_password_reset_token(request.email)
-    if token:
-        # In a real app, send actual email here.
-        # For now, token can be retrieved from backend logs for manual testing.
-        # In production, return 200 regardless of user existence.
-        pass
-
+    await service.request_password_reset(request.email)
     return {"detail": "If your email is registered, you will receive a reset link."}
 
 
