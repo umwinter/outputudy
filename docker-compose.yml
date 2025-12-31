@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
@@ -12,13 +12,12 @@ services:
     environment:
       - NODE_ENV=development
       - AUTH_SECRET=${AUTH_SECRET}
-    command: pnpm dev
     tty: true
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
