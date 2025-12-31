@@ -1,4 +1,4 @@
-name: Infrastructure
+name: Terraform CI
 
 on:
   push:
@@ -23,7 +23,9 @@ env:
   # Other defaults (region, app_name) are fine. db_activation_policy defaults to ALWAYS.
 
 jobs:
-  terraform:
+  plan-and-check:
+    name: Plan and Verify
+    runs-on: ubuntu-latest
     runs-on: ubuntu-latest
     defaults:
       run:
