@@ -45,5 +45,5 @@ class SQLAlchemyUserRepository(UserRepository):
         result = await self.db.execute(stmt)
         user_orm = result.scalar_one_or_none()
         if user_orm:
-            user_orm.hashed_password = hashed_password
+            user_orm.hashed_password = hashed_password  # type: ignore
             await self.db.commit()
