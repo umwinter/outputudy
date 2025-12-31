@@ -1,27 +1,28 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models import User
-from app.infrastructure.repository.user_repository import InMemoryUserRepository
+from app.infrastructure.database import get_db
+from app.infrastructure.repository.sqlalchemy_user_repository import (
+    SQLAlchemyUserRepository,
+)
 from app.service.user_service import UserService
 
 router = APIRouter()
 
 
-# Dependency Injection (Manual for now, typically handled by DI
-# framework or FastAPI Depends)
-def get_user_service() -> UserService:
-    # In a real app, this would get the repository from DB connection
-    repo = InMemoryUserRepository()
+def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
+    repo = SQLAlchemyUserRepository(db)
     return UserService(repo)
 
 
 @router.get("/users", response_model=list[User])
-def list_users(service: UserService = Depends(get_user_service)) -> list[User]:
-    return service.get_users()
+async def list_users(service: UserService = Depends(get_user_service)) -> list[User]:
+    return await service.get_users()
 
 
 @router.get("/users/{user_id}", response_model=User | None)
-def get_user(
+async def get_user(
     user_id: int, service: UserService = Depends(get_user_service)
 ) -> User | None:
-    return service.get_user_by_id(user_id)
+    return await service.get_user_by_id(user_id)

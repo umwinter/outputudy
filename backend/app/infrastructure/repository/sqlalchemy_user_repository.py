@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models import User
 from app.domain.repository import UserRepository
@@ -6,34 +7,43 @@ from app.infrastructure.orm_models import UserORM
 
 
 class SQLAlchemyUserRepository(UserRepository):
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def get_user_by_id(self, user_id: int) -> User | None:
-        user_orm = self.db.query(UserORM).filter(UserORM.id == user_id).first()
+    async def get_user_by_id(self, user_id: int) -> User | None:
+        stmt = select(UserORM).where(UserORM.id == user_id)
+        result = await self.db.execute(stmt)
+        user_orm = result.scalar_one_or_none()
         if user_orm:
             return User.model_validate(user_orm)
         return None
 
-    def get_user_by_email(self, email: str) -> User | None:
-        user_orm = self.db.query(UserORM).filter(UserORM.email == email).first()
+    async def get_user_by_email(self, email: str) -> User | None:
+        stmt = select(UserORM).where(UserORM.email == email)
+        result = await self.db.execute(stmt)
+        user_orm = result.scalar_one_or_none()
         if user_orm:
             return User.model_validate(user_orm)
         return None
 
-    def list_users(self) -> list[User]:
-        users_orm = self.db.query(UserORM).all()
+    async def list_users(self) -> list[User]:
+        stmt = select(UserORM)
+        result = await self.db.execute(stmt)
+        users_orm = result.scalars().all()
         return [User.model_validate(u) for u in users_orm]
 
-    def create_user(self, name: str, email: str, hashed_password: str) -> User:
+    async def create_user(self, name: str, email: str, hashed_password: str) -> User:
         user_orm = UserORM(name=name, email=email, hashed_password=hashed_password)
         self.db.add(user_orm)
-        self.db.commit()
-        self.db.refresh(user_orm)
+        await self.db.commit()
+        await self.db.refresh(user_orm)
         return User.model_validate(user_orm)
 
-    def update_user_password(self, user_id: int, hashed_password: str) -> None:
-        self.db.query(UserORM).filter(UserORM.id == user_id).update(
-            {"hashed_password": hashed_password}
-        )
-        self.db.commit()
+    async def update_user_password(self, user_id: int, hashed_password: str) -> None:
+        # Fetch first to update safely with ORM, or use update statement
+        stmt = select(UserORM).where(UserORM.id == user_id)
+        result = await self.db.execute(stmt)
+        user_orm = result.scalar_one_or_none()
+        if user_orm:
+            user_orm.hashed_password = hashed_password
+            await self.db.commit()

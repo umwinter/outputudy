@@ -13,8 +13,8 @@ class AuthService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
 
-    def authenticate_user(self, email: str, password: str) -> User | None:
-        user = self.user_repo.get_user_by_email(email)
+    async def authenticate_user(self, email: str, password: str) -> User | None:
+        user = await self.user_repo.get_user_by_email(email)
         if not user:
             return None
 
@@ -26,15 +26,15 @@ class AuthService:
 
         return user
 
-    def register_user(self, name: str, email: str, password: str) -> User:
-        if self.user_repo.get_user_by_email(email):
+    async def register_user(self, name: str, email: str, password: str) -> User:
+        if await self.user_repo.get_user_by_email(email):
             raise ValueError("Email already registered")
 
         hashed_password = get_password_hash(password)
-        return self.user_repo.create_user(name, email, hashed_password)
+        return await self.user_repo.create_user(name, email, hashed_password)
 
-    def create_password_reset_token(self, email: str) -> str | None:
-        user = self.user_repo.get_user_by_email(email)
+    async def create_password_reset_token(self, email: str) -> str | None:
+        user = await self.user_repo.get_user_by_email(email)
         if not user:
             return None
 
@@ -45,6 +45,6 @@ class AuthService:
         )
         return token
 
-    def reset_password(self, user_id: int, new_password: str) -> None:
+    async def reset_password(self, user_id: int, new_password: str) -> None:
         hashed_password = get_password_hash(new_password)
-        self.user_repo.update_user_password(user_id, hashed_password)
+        await self.user_repo.update_user_password(user_id, hashed_password)

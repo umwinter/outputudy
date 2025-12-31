@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models import User as UserDomain
 from app.infrastructure.auth_middleware import get_current_user
@@ -42,7 +42,7 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 
-def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
+def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
     repo = SQLAlchemyUserRepository(db)
     return AuthService(repo)
 
@@ -51,7 +51,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
 async def login(
     request: LoginRequest, service: AuthService = Depends(get_auth_service)
 ) -> dict[str, str]:
-    user = service.authenticate_user(request.email, request.password)
+    user = await service.authenticate_user(request.email, request.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -82,7 +82,9 @@ async def register(
     request: RegisterRequest, service: AuthService = Depends(get_auth_service)
 ) -> dict[str, str]:
     try:
-        user = service.register_user(request.name, request.email, request.password)
+        user = await service.register_user(
+            request.name, request.email, request.password
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -100,7 +102,7 @@ async def register(
 async def forgot_password(
     request: ForgotPasswordRequest, service: AuthService = Depends(get_auth_service)
 ) -> dict[str, str]:
-    token = service.create_password_reset_token(request.email)
+    token = await service.create_password_reset_token(request.email)
     if token:
         # In a real app, send actual email here.
         # For now, token can be retrieved from backend logs for manual testing.
@@ -122,5 +124,5 @@ async def reset_password(
     if not user_id:
         raise HTTPException(status_code=400, detail="Invalid token")
 
-    service.reset_password(int(user_id), request.new_password)
+    await service.reset_password(int(user_id), request.new_password)
     return {"detail": "Password has been reset successfully."}
