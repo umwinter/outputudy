@@ -1,4 +1,5 @@
 resource "google_project_service" "apis" {
+  # Trigger CI
   for_each = toset([
     "run.googleapis.com",
     "compute.googleapis.com",
