@@ -231,6 +231,39 @@ resource "google_cloud_run_v2_service_iam_binding" "frontend_noauth" {
   ]
 }
 
+# Cloud Run Job (DB Migration)
+resource "google_cloud_run_v2_job" "migration" {
+  name     = "${var.app_name}-migration"
+  location = var.region
+
+  template {
+    template {
+      vpc_access {
+        network_interfaces {
+          network    = google_compute_network.vpc.name
+          subnetwork = google_compute_subnetwork.subnet.name
+        }
+        egress = "PRIVATE_RANGES_ONLY"
+      }
+
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder, updated by CI
+
+        env {
+          name = "DATABASE_URL"
+          # Same connection string as backend
+          value = "postgresql+asyncpg://outputudy_user:${var.db_password}@${google_sql_database_instance.master.private_ip_address}/${var.app_name}"
+        }
+
+        # Override CMD to run migration
+        command = ["alembic", "upgrade", "head"]
+      }
+    }
+  }
+
+  depends_on = [google_project_service.apis, google_sql_database_instance.master]
+}
+
 # --- CI/CD & Workload Identity Federation ---
 
 # 1. Service Account for GitHub Actions

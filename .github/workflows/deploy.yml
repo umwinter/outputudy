@@ -54,6 +54,17 @@ jobs:
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:${{ github.sha }}
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:latest
 
+      - name: Update Migration Job
+        run: |
+          gcloud run jobs update outputudy-migration \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --set-env-vars DATABASE_URL=postgresql+asyncpg://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy
+
+      - name: Execute Migration
+        run: |
+          gcloud run jobs execute outputudy-migration --region ${{ env.REGION }} --wait
+
       - name: Deploy Backend
         uses: google-github-actions/deploy-cloudrun@v2
         with:
