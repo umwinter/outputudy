@@ -63,5 +63,5 @@ api-gen:
 	@echo "📜 Generating OpenAPI Schema..."
 	@cd backend && DATABASE_URL="sqlite+aiosqlite:///:memory:" SECRET_KEY="gen-secret" /Users/umeta/.local/bin/uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > ../frontend/src/types/openapi.json
 	@echo "🔧 Generating TypeScript Client..."
-	@cd frontend && npx -y openapi-typescript-codegen --input src/types/openapi.json --output src/lib/api-client --client axios
+	@cd frontend && npx -y openapi-typescript-codegen --input src/types/openapi.json --output src/lib/api-client --client fetch
 	@echo "✅ Done!"
