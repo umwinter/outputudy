@@ -37,6 +37,11 @@ jobs:
       - name: Run tests
         run: uv run pytest -n auto
 
+      - name: Check OpenAPI Schema Freshness
+        run: |
+          DATABASE_URL="sqlite+aiosqlite:///:memory:" SECRET_KEY="check-secret" uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > ../frontend/src/types/openapi.json
+          git diff --exit-code ../frontend/src/types/openapi.json
+
   frontend:
     name: Frontend CI
     runs-on: ubuntu-latest

@@ -50,10 +50,16 @@ repos:
         stages: [pre-push]
         pass_filenames: false
 
-      # --- Frontend Hooks (Pre-push) ---
       - id: frontend-type-check
         name: frontend type-check
         entry: docker-compose exec -T frontend pnpm type-check
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+
+      - id: check-openapi
+        name: check openapi freshness
+        entry: bash -c "make api-gen && git diff --exit-code frontend/src/types/openapi.json frontend/src/lib/api-client"
         language: system
         stages: [pre-push]
         pass_filenames: false

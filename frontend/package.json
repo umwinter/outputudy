@@ -9,7 +9,8 @@
     "lint": "eslint src",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "api-gen": "openapi-typescript-codegen --input src/types/openapi.json --output src/lib/api-client --client axios"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

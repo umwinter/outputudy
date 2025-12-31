@@ -56,8 +56,12 @@ test:
 	docker-compose exec frontend pnpm test
 
 # Clean up temporary files
-clean:
-	rm -rf backend/.mypy_cache
-	rm -rf backend/.ruff_cache
-	rm -rf frontend/.next
 	rm -rf frontend/node_modules
+
+# Generate OpenAPI Client
+api-gen:
+	@echo "📜 Generating OpenAPI Schema..."
+	@cd backend && DATABASE_URL="sqlite+aiosqlite:///:memory:" SECRET_KEY="gen-secret" /Users/umeta/.local/bin/uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > ../frontend/src/types/openapi.json
+	@echo "🔧 Generating TypeScript Client..."
+	@cd frontend && npx -y openapi-typescript-codegen --input src/types/openapi.json --output src/lib/api-client --client axios
+	@echo "✅ Done!"
