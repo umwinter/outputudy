@@ -1,14 +1,40 @@
-FROM node:22-bullseye
+# Stage 1: Builder
+FROM node:20-bullseye AS builder
 
 WORKDIR /app
 
-# Install pnpm via volta
-# Note: In Docker, we can install pnpm directly or use corepack, but sticking to requested tools if possible.
-# However, simpler for dev container to just use corepack or npm to install pnpm globally.
-# Let's use corepack which is standard in Node images now.
+# Enable pnpm
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
-CMD ["pnpm", "dev"]
+COPY . .
+
+# Build Next.js app
+RUN pnpm build
+
+# Stage 2: Runner
+FROM node:20-bullseye-slim AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Don't run as root
+RUN groupadd -r nodejs && useradd -r -g nodejs nextjs
+
+# Copy necessary files from builder
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
