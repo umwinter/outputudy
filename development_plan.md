@@ -36,8 +36,12 @@
 
 #### Phase 0.2: CI/CD & Production Release
 *   [ ] **Container**: `Dockerfile` の本番最適化 (Multi-stage build)
-*   [ ] **CI/CD**: GitHub Actions
-    *   Lint/Test job
+*   [ ] **CI/CD**: GitHub- [x] Application CI/CD Workflow (`deploy.yml`)
+    - [x] Build & Deploy Automation
+    - [ ] **Refactor Docker for Production (Multi-stage)** <!-- Issue #8 -->
+        - [ ] Frontend: Builder vs Runner stages
+        - [ ] Backend: Prod vs Dev configurations
+        - [ ] Update `docker-compose.yml` to target dev stages
     *   Build & Push to Artifact Registry
     *   Deploy to Cloud Run
 *   [ ] **Verification**: 本番環境での Signup/Login 動作確認
