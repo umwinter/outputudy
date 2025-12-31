@@ -5,3 +5,10 @@
 
 # Env files (Root level)
 .env
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+*.tfvars
