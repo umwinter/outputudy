@@ -37,6 +37,12 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
+      - name: Get Cloud SQL Private IP
+        run: |
+          DB_IP=$(gcloud sql instances describe outputudy-db --project=${{ env.PROJECT_ID }} --format="value(ipAddresses.filter(type:PRIVATE).ipAddress)")
+          echo "DB_IP=${DB_IP}" >> $GITHUB_ENV
+          echo "Fetched DB_IP: ${DB_IP}"
+
       # --- Backend ---
       - name: Build Backend
         run: |
