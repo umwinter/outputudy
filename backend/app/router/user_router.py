@@ -16,12 +16,12 @@ def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
     return UserService(repo)
 
 
-@router.get("/users", response_model=list[User])
+@router.get("", response_model=list[User])
 async def list_users(service: UserService = Depends(get_user_service)) -> list[User]:
     return await service.get_users()
 
 
-@router.get("/users/{user_id}", response_model=User | None)
+@router.get("/{user_id}", response_model=User | None)
 async def get_user(
     user_id: int, service: UserService = Depends(get_user_service)
 ) -> User | None:
