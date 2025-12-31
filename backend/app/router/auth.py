@@ -1,59 +1,42 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
+from app.domain.email import EmailService
 from app.domain.models import User as UserDomain
 from app.infrastructure.auth_middleware import get_current_user
 from app.infrastructure.database import get_db
 from app.infrastructure.email.console import ConsoleEmailService
-from app.infrastructure.repository.sqlalchemy_user_repository import (
+from app.infrastructure.email.smtp import SMTPEmailService
+from app.infrastructure.repository.sqlalchemy.user import (
     SQLAlchemyUserRepository,
 )
 from app.infrastructure.security import create_access_token, verify_access_token
-from app.service.auth_service import AuthService
+from app.schemas.auth import (
+    ForgotPasswordRequest,
+    LoginRequest,
+    LoginResponse,
+    MessageResponse,
+    RegisterRequest,
+    ResetPasswordRequest,
+)
+from app.service.auth import AuthService
 
 router = APIRouter()
 
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class LoginResponse(BaseModel):
-    id: str
-    name: str
-    email: str
-    access_token: str
-    token_type: str = "bearer"
-
-
-class RegisterRequest(BaseModel):
-    name: str
-    email: EmailStr
-    password: str
-
-
-class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
-
-
-class ResetPasswordRequest(BaseModel):
-    token: str
-    new_password: str
-
-
-class MessageResponse(BaseModel):
-    detail: str
-
-
 def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
     repo = SQLAlchemyUserRepository(db)
-    email_service = ConsoleEmailService()
+    if settings.ENV == "test":
+        email_service: EmailService = ConsoleEmailService()
+    else:
+        email_service = SMTPEmailService()
     return AuthService(repo, email_service)
 
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse, operation_id="login")
 async def login(
     request: LoginRequest, service: AuthService = Depends(get_auth_service)
 ) -> LoginResponse:
@@ -64,26 +47,26 @@ async def login(
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
 
     return LoginResponse(
-        id=str(user.id),
+        id=user.id,
         name=user.name,
         email=user.email,
         access_token=access_token,
     )
 
 
-@router.get("/me", response_model=LoginResponse)
+@router.get("/me", response_model=LoginResponse, operation_id="get_current_user")
 async def read_users_me(
     current_user: UserDomain = Depends(get_current_user),
 ) -> LoginResponse:
     return LoginResponse(
-        id=str(current_user.id),
+        id=current_user.id,
         name=current_user.name,
         email=current_user.email,
         access_token="N/A",  # Token is not re-issued here for now
     )
 
 
-@router.post("/register", response_model=LoginResponse)
+@router.post("/register", response_model=LoginResponse, operation_id="register")
 async def register(
     request: RegisterRequest, service: AuthService = Depends(get_auth_service)
 ) -> LoginResponse:
@@ -97,14 +80,16 @@ async def register(
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
 
     return LoginResponse(
-        id=str(user.id),
+        id=user.id,
         name=user.name,
         email=user.email,
         access_token=access_token,
     )
 
 
-@router.post("/forgot-password", response_model=MessageResponse)
+@router.post(
+    "/forgot-password", response_model=MessageResponse, operation_id="forgot_password"
+)
 async def forgot_password(
     request: ForgotPasswordRequest, service: AuthService = Depends(get_auth_service)
 ) -> MessageResponse:
@@ -114,7 +99,9 @@ async def forgot_password(
     )
 
 
-@router.post("/reset-password", response_model=MessageResponse)
+@router.post(
+    "/reset-password", response_model=MessageResponse, operation_id="reset_password"
+)
 async def reset_password(
     request: ResetPasswordRequest, service: AuthService = Depends(get_auth_service)
 ) -> MessageResponse:
@@ -126,5 +113,5 @@ async def reset_password(
     if not user_id:
         raise HTTPException(status_code=400, detail="Invalid token")
 
-    await service.reset_password(int(user_id), request.new_password)
+    await service.reset_password(UUID(str(user_id)), request.new_password)
     return MessageResponse(detail="Password has been reset successfully.")

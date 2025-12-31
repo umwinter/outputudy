@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type User = {
-  id: number;
-  name: string;
-  email: string;
-  hashed_password?: string | null;
+export type UserPublic = {
+    id: string;
+    name: string;
+    email: string;
 };

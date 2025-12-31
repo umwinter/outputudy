@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +12,7 @@ class SQLAlchemyUserRepository(UserRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_user_by_id(self, user_id: int) -> User | None:
+    async def get_user_by_id(self, user_id: UUID) -> User | None:
         stmt = select(UserORM).where(UserORM.id == user_id)
         result = await self.db.execute(stmt)
         user_orm = result.scalar_one_or_none()
@@ -39,7 +41,7 @@ class SQLAlchemyUserRepository(UserRepository):
         await self.db.refresh(user_orm)
         return User.model_validate(user_orm)
 
-    async def update_user_password(self, user_id: int, hashed_password: str) -> None:
+    async def update_user_password(self, user_id: UUID, hashed_password: str) -> None:
         # Fetch first to update safely with ORM, or use update statement
         stmt = select(UserORM).where(UserORM.id == user_id)
         result = await self.db.execute(stmt)

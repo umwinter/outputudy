@@ -31,12 +31,12 @@ describe("SignUpForm", () => {
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /sign up/i })).toBeInTheDocument();
   });
 
   it("shows error messages for empty fields", async () => {
     render(<SignUpForm />);
-    const submitButton = screen.getByRole("button", { name: /create account/i });
+    const submitButton = screen.getByRole("button", { name: /sign up/i });
 
     fireEvent.click(submitButton);
 
@@ -55,7 +55,7 @@ describe("SignUpForm", () => {
     fireEvent.change(screen.getByLabelText(/^password$/i), { target: { value: "password123" } });
     fireEvent.change(screen.getByLabelText(/confirm password/i), { target: { value: "mismatch" } });
 
-    fireEvent.click(screen.getByRole("button", { name: /create account/i }));
+    fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe("SignUpForm", () => {
       target: { value: "password123" },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /create account/i }));
+    fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
       expect(register).toHaveBeenCalledWith({
@@ -101,7 +101,7 @@ describe("SignUpForm", () => {
       target: { value: "password123" },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /create account/i }));
+    fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/email already registered/i)).toBeInTheDocument();

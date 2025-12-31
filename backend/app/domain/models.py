@@ -1,8 +1,10 @@
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict
 
 
 class User(BaseModel):
-    id: int
+    id: UUID
     name: str
     email: str
     hashed_password: str | None = None

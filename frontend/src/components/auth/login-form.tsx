@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { login } from "@/actions/auth";
+import { siteConfig } from "@/config/site";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -75,11 +76,13 @@ export function LoginForm() {
             <FormItem>
               <div className="flex items-center justify-between">
                 <FormLabel>Password</FormLabel>
+
+
                 <Link
                   href="/forgot-password"
                   className="text-primary text-sm font-medium hover:underline"
                 >
-                  Forgot password?
+                  {siteConfig.auth.login.forgotPassword}
                 </Link>
               </div>
               <FormControl>
@@ -90,8 +93,10 @@ export function LoginForm() {
           )}
         />
         {error && <div className="text-destructive text-sm font-medium">{error}</div>}
-        <Button type="submit" className="w-full">
-          Sign in
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting
+            ? siteConfig.auth.login.submittingButton
+            : siteConfig.auth.login.submitButton}
         </Button>
       </form>
     </Form>

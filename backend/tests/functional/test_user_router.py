@@ -1,5 +1,5 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.orm_models import UserORM
@@ -7,7 +7,22 @@ from app.infrastructure.security import get_password_hash
 
 
 @pytest.mark.asyncio
-async def test_list_users(client: TestClient, db_session: AsyncSession) -> None:
+async def test_list_users(client: AsyncClient, db_session: AsyncSession) -> None:
+    # Need to auth first
+    import uuid
+
+    from app.infrastructure.security import create_access_token
+
+    # Create a user to auth with
+    admin_id = uuid.uuid4()
+    admin_user = UserORM(
+        name="Admin",
+        email="admin@example.com",
+        id=admin_id,
+        hashed_password=get_password_hash("pass"),
+    )
+    db_session.add(admin_user)
+
     # Setup test users
     user1 = UserORM(
         name="User1",
@@ -22,17 +37,25 @@ async def test_list_users(client: TestClient, db_session: AsyncSession) -> None:
     db_session.add_all([user1, user2])
     await db_session.commit()
 
-    response = client.get("/api/users")
+    token = create_access_token(data={"sub": str(admin_id)})
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = await client.get("/api/users", headers=headers)
     assert response.status_code == 200
     data = response.json()
-    assert len(data) >= 2
+    # Should see user1, user2, and admin
+    assert len(data) >= 3
     emails = [u["email"] for u in data]
     assert "user1@example.com" in emails
     assert "user2@example.com" in emails
 
 
 @pytest.mark.asyncio
-async def test_get_user_success(client: TestClient, db_session: AsyncSession) -> None:
+async def test_get_user_success(client: AsyncClient, db_session: AsyncSession) -> None:
+    # Need to auth
+
+    from app.infrastructure.security import create_access_token
+
     user = UserORM(
         name="Single User",
         email="single@example.com",
@@ -40,29 +63,41 @@ async def test_get_user_success(client: TestClient, db_session: AsyncSession) ->
     )
     db_session.add(user)
     await db_session.commit()
-
-    # Reuse the ID from the commited user
-    # Note: UserORM ID autoincrement might need explicit fetch or refresh
-    # if not returning but object identity map persists?
-    # Better to fetch user by email or refresh
     await db_session.refresh(user)
 
-    response = client.get(f"/api/users/{user.id}")
+    token = create_access_token(data={"sub": str(user.id)})
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = await client.get(f"/api/users/{user.id}", headers=headers)
     assert response.status_code == 200
     assert response.json()["email"] == "single@example.com"
 
 
 @pytest.mark.asyncio
-async def test_get_user_not_found(client: TestClient) -> None:
-    response = client.get("/api/users/99999")
-    # For now it returns null or 404?
-    # Router says: return service.get_user_by_id(user_id) which returns User | None
-    # FastAPI returns null (200) if no 404 raised?
-    # Actually user_router.py simply returns the user. If None, it returns null.
-    # It might be better to 404, but current implementation expects what?
-    # Previous tests expected what?
-    # Let's check user_router.py code.
-    # It returns "User | None".
-    # So response.json() is null.
+async def test_get_user_not_found(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
+    import uuid
+
+    # Need to auth
+    from app.infrastructure.security import create_access_token
+
+    # Random ID for auth
+    uid = uuid.uuid4()
+    # Mock finding SOME user for auth? Or insert one?
+    # Auth middleware fetches user from DB. So we MUST insert a user to auth with.
+    user = UserORM(
+        name="Auth User",
+        email="auth_user@example.com",
+        id=uid,
+        hashed_password=get_password_hash("pass"),
+    )
+    db_session.add(user)
+    await db_session.commit()
+
+    token = create_access_token(data={"sub": str(uid)})
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = await client.get(f"/api/users/{uuid.uuid4()}", headers=headers)
     assert response.status_code == 200
     assert response.json() is None

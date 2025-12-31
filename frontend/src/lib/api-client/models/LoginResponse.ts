@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export type LoginResponse = {
-  id: string;
-  name: string;
-  email: string;
-  access_token: string;
-  token_type?: string;
+    id: string;
+    name: string;
+    email: string;
+    access_token: string;
+    token_type?: string;
 };

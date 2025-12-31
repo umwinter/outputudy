@@ -3,5 +3,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type MessageResponse = {
-  detail: string;
+    detail: string;
 };

@@ -73,8 +73,8 @@ jobs:
             DATABASE_URL=postgresql+asyncpg://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy
           # Note: DB_PASSWORD needs to be in Secrets (new one) or retrieved via Secret Manager in Code.
           # For now, we assume user adds DB_PASSWORD to GitHub Secrets.
-          # However, in main.tf we used a fixed password variable locally. 
-          # In CI, we should probably retrieve it or set it. 
+          # However, in main.tf we used a fixed password variable locally.
+          # In CI, we should probably retrieve it or set it.
           # Since user put everything in env, let's ask user.
 
       # --- Frontend ---

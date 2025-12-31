@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from uuid import UUID
 
 from .models import User
 
 
 class UserRepository(ABC):
     @abstractmethod
-    async def get_user_by_id(self, user_id: int) -> User | None:
+    async def get_user_by_id(self, user_id: UUID) -> User | None:
         pass
 
     @abstractmethod
@@ -21,5 +22,5 @@ class UserRepository(ABC):
         pass
 
     @abstractmethod
-    async def update_user_password(self, user_id: int, hashed_password: str) -> None:
+    async def update_user_password(self, user_id: UUID, hashed_password: str) -> None:
         pass

@@ -5,8 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.exception_handlers import add_exception_handlers
 from app.core.logging import setup_logging
-from app.router import auth_router, user_router
+from app.router import api_router
 
 
 @asynccontextmanager
@@ -21,10 +22,7 @@ app = FastAPI(
 )
 
 # CORS configuration
-origins = [
-    "http://localhost:3000",
-    "http://localhost:8080",
-]
+origins = settings.BACKEND_CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,8 +32,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
-app.include_router(user_router.router, prefix="/api/users", tags=["users"])
+app.include_router(api_router, prefix="/api")
+
+add_exception_handlers(app)
 
 
 @app.get("/")

@@ -14,7 +14,10 @@ if TYPE_CHECKING:
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # Create Async Engine
-async_engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False)
+# Echo logs in development
+async_engine = create_async_engine(
+    SQLALCHEMY_DATABASE_URL, echo=(settings.ENV == "development")
+)
 AsyncSessionLocal = async_sessionmaker(
     bind=async_engine, class_=AsyncSession, expire_on_commit=False
 )

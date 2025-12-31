@@ -29,5 +29,5 @@ if __name__ == "__main__":
     BACKEND_URL = os.environ.get("BACKEND_URL", "http://backend:8000/openapi.json")
     # Output directly to openapi.json in src
     OUTPUT_PATH = os.environ.get("OUTPUT_PATH", "/docs/src/openapi.json")
-    
+
     generate_static_docs(BACKEND_URL, OUTPUT_PATH)

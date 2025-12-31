@@ -17,4 +17,3 @@ theme:
 plugins:
   - swagger-ui-tag
   - redoc-tag
-

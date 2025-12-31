@@ -6,7 +6,7 @@ from app.domain.email import EmailService
 from app.domain.models import User
 from app.domain.repository import UserRepository
 from app.infrastructure.security import get_password_hash
-from app.service.auth_service import AuthService
+from app.service.auth import AuthService
 
 
 @pytest.mark.asyncio
@@ -14,10 +14,15 @@ async def test_authenticate_user_success() -> None:
     # Arrange
     mock_repo = MagicMock(spec=UserRepository)
     mock_email = MagicMock(spec=EmailService)
+    import uuid
+
     password = "correct_password"
     hashed = get_password_hash(password)
     mock_user = User(
-        id=1, name="Test User", email="test@example.com", hashed_password=hashed
+        id=uuid.uuid4(),
+        name="Test User",
+        email="test@example.com",
+        hashed_password=hashed,
     )
     mock_repo.get_user_by_email = AsyncMock(return_value=mock_user)
 
@@ -37,9 +42,14 @@ async def test_authenticate_user_invalid_password() -> None:
     # Arrange
     mock_repo = MagicMock(spec=UserRepository)
     mock_email = MagicMock(spec=EmailService)
+    import uuid
+
     hashed = get_password_hash("correct_password")
     mock_user = User(
-        id=1, name="Test User", email="test@example.com", hashed_password=hashed
+        id=uuid.uuid4(),
+        name="Test User",
+        email="test@example.com",
+        hashed_password=hashed,
     )
     mock_repo.get_user_by_email = AsyncMock(return_value=mock_user)
 
@@ -79,8 +89,13 @@ async def test_request_password_reset_success() -> None:
     mock_email = MagicMock(spec=EmailService)
     mock_email.send_password_reset_email = AsyncMock()
 
+    import uuid
+
     mock_user = User(
-        id=1, name="Test User", email="test@example.com", hashed_password="pw"
+        id=uuid.uuid4(),
+        name="Test User",
+        email="test@example.com",
+        hashed_password="pw",
     )
     mock_repo.get_user_by_email = AsyncMock(return_value=mock_user)
 

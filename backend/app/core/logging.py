@@ -6,7 +6,7 @@ import structlog
 from app.core.config import settings
 
 
-def setup_logging():
+def setup_logging(json_logs: bool = False, log_level: str = "INFO") -> None:
     shared_processors = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,
@@ -18,25 +18,16 @@ def setup_logging():
         structlog.processors.UnicodeDecoder(),
     ]
 
-    if settings.ENV == "production":
-        processors = shared_processors + [
-            structlog.processors.JSONRenderer(),
-        ]
-    else:
-        processors = shared_processors + [
-            structlog.dev.ConsoleRenderer(),
-        ]
-
     structlog.configure(
-        processors=processors,
+        processors=shared_processors
+        + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],  # type: ignore
         logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
 
     # Configure standard logging to use structlog
     formatter = structlog.stdlib.ProcessorFormatter(
-        foreign_pre_chain=shared_processors,
+        foreign_pre_chain=shared_processors,  # type: ignore
         processors=[
             structlog.stdlib.ProcessorFormatter.remove_processors_meta,
             structlog.dev.ConsoleRenderer()

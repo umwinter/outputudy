@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { register } from "@/actions/auth";
+import { siteConfig } from "@/config/site";
 
 const formSchema = z
   .object({
@@ -123,9 +124,13 @@ export function SignUpForm() {
             </FormItem>
           )}
         />
+
+
         {error && <div className="text-destructive text-sm font-medium">{error}</div>}
-        <Button type="submit" className="w-full">
-          Create Account
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting
+            ? siteConfig.auth.register.submittingButton
+            : siteConfig.auth.register.submitButton}
         </Button>
       </form>
     </Form>

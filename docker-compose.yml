@@ -22,12 +22,14 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
+      - /app/.venv
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/outputudy
+      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=outputudy
       - AUTH_SECRET=${AUTH_SECRET}
+      - SECRET_KEY=${AUTH_SECRET:-supersecretkey}
     depends_on:
       db:
         condition: service_healthy
@@ -93,6 +95,7 @@ services:
     profiles: [ "tools" ]
     volumes:
       - ./backend:/app
+      - /app/.venv
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/outputudy
     depends_on:

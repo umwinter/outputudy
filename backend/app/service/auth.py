@@ -1,4 +1,5 @@
 from datetime import timedelta
+from uuid import UUID
 
 from app.domain.email import EmailService
 from app.domain.models import User
@@ -48,6 +49,6 @@ class AuthService:
         )
         await self.email_service.send_password_reset_email(email, token)
 
-    async def reset_password(self, user_id: int, new_password: str) -> None:
+    async def reset_password(self, user_id: UUID, new_password: str) -> None:
         hashed_password = get_password_hash(new_password)
         await self.user_repo.update_user_password(user_id, hashed_password)
