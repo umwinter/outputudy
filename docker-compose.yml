@@ -12,7 +12,6 @@ services:
     environment:
       - NODE_ENV=development
       - AUTH_SECRET=${AUTH_SECRET}
-    command: pnpm dev
     tty: true
 
   backend:
