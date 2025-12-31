@@ -26,7 +26,6 @@ jobs:
   plan-and-check:
     name: Plan and Verify
     runs-on: ubuntu-latest
-    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: infra
