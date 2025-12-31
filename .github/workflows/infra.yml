@@ -43,6 +43,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Wake up Cloud SQL (if stopped)
+        run: |
+          gcloud sql instances patch outputudy-db --activation-policy=ALWAYS --quiet || true
+          echo "Waiting for instance to start..."
+          sleep 30
+
       - name: Terraform Init
         id: init
         run: terraform init
