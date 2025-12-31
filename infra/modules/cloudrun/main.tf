@@ -1,0 +1,88 @@
+# Cloud Run (Backend)
+resource "google_cloud_run_v2_service" "backend" {
+  name     = "${var.app_name}-backend"
+  location = var.region
+  ingress  = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    vpc_access {
+      network_interfaces {
+        network    = var.network_name
+        subnetwork = var.subnet_name
+      }
+      egress = "PRIVATE_RANGES_ONLY"
+    }
+
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+      env {
+        name  = "DATABASE_URL"
+        value = "postgresql+asyncpg://outputudy_user:${var.db_password}@${var.db_private_ip}/${var.app_name}"
+      }
+    }
+  }
+}
+
+resource "google_cloud_run_v2_service_iam_binding" "backend_noauth" {
+  location = google_cloud_run_v2_service.backend.location
+  name     = google_cloud_run_v2_service.backend.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}
+
+# Cloud Run (Frontend)
+resource "google_cloud_run_v2_service" "frontend" {
+  name     = "${var.app_name}-frontend"
+  location = var.region
+  ingress  = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      # In future, we will add ENV vars here (e.g. NEXT_PUBLIC_API_URL)
+    }
+  }
+}
+
+resource "google_cloud_run_v2_service_iam_binding" "frontend_noauth" {
+  location = google_cloud_run_v2_service.frontend.location
+  name     = google_cloud_run_v2_service.frontend.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}
+
+# Cloud Run Job (DB Migration)
+resource "google_cloud_run_v2_job" "migration" {
+  name     = "${var.app_name}-migration"
+  location = var.region
+
+  template {
+    template {
+      vpc_access {
+        network_interfaces {
+          network    = var.network_name
+          subnetwork = var.subnet_name
+        }
+        egress = "PRIVATE_RANGES_ONLY"
+      }
+
+      containers {
+        image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+        env {
+          name = "DATABASE_URL"
+          # Use synchronous driver (psycopg2) for Alembic migrations
+          value = "postgresql+psycopg2://outputudy_user:${var.db_password}@${var.db_private_ip}/${var.app_name}"
+        }
+
+        # Override CMD to run migration
+        command = ["alembic", "upgrade", "head"]
+      }
+    }
+  }
+}

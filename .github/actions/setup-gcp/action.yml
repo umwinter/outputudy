@@ -1,0 +1,35 @@
+name: 'Setup GCP & Terraform'
+description: 'Authenticates to Google Cloud and sets up common tools'
+inputs:
+  workload_identity_provider:
+    description: 'The Workload Identity Provider resource name'
+    required: true
+  service_account:
+    description: 'The Service Account email to impersonate'
+    required: true
+  setup_terraform:
+    description: 'Whether to install Terraform'
+    required: false
+    default: 'false'
+  terraform_version:
+    description: 'Terraform version to install'
+    required: false
+    default: '1.5.7' # or latest, strict pinning recommended
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.service_account }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Setup Terraform
+      if: inputs.setup_terraform == 'true'
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ inputs.terraform_version }}

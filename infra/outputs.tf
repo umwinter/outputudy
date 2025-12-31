@@ -1,29 +1,27 @@
 output "backend_url" {
   description = "The URL of the Backend Cloud Run service"
-  value       = google_cloud_run_v2_service.backend.uri
+  value       = module.cloudrun.backend_url
 }
 
 output "frontend_url" {
   description = "The URL of the Frontend Cloud Run service"
-  value       = google_cloud_run_v2_service.frontend.uri
+  value       = module.cloudrun.frontend_url
 }
 
 output "database_connection_name" {
   description = "The connection name of the Cloud SQL instance"
-  value       = google_sql_database_instance.master.connection_name
+  value       = module.database.connection_name
 }
 
 output "wif_provider_name" {
   description = "Workload Identity Provider resource name"
-  value       = google_iam_workload_identity_pool_provider.provider.name
+  value       = module.iam.wif_provider_name
 }
 
 output "service_account_email" {
   description = "Service Account email for GitHub Actions"
-  value       = google_service_account.github_actions.email
+  value       = module.iam.service_account_email
 }
-
-
 
 output "bucket_name" {
   description = "The name of the GCS bucket"
