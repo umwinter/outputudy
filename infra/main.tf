@@ -177,7 +177,7 @@ resource "google_cloud_run_v2_service" "backend" {
         network    = google_compute_network.vpc.name
         subnetwork = google_compute_subnetwork.subnet.name
       }
-      egress = "ALL_TRAFFIC"
+      egress = "PRIVATE_RANGES_ONLY"
     }
 
     containers {
