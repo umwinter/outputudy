@@ -1,4 +1,4 @@
-name: Deploy
+name: App Deploy (Cloud Run)
 
 on:
   push:
@@ -19,7 +19,7 @@ env:
   ARTIFACT_REPO: outputudy # repo name in Artifact Registry
 
 jobs:
-  build-and-deploy:
+  cloud-run-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
