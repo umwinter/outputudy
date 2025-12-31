@@ -13,6 +13,18 @@ output "database_connection_name" {
   value       = google_sql_database_instance.master.connection_name
 }
 
+output "wif_provider_name" {
+  description = "Workload Identity Provider resource name"
+  value       = google_iam_workload_identity_pool_provider.provider.name
+}
+
+output "service_account_email" {
+  description = "Service Account email for GitHub Actions"
+  value       = google_service_account.github_actions.email
+}
+
+
+
 output "bucket_name" {
   description = "The name of the GCS bucket"
   value       = google_storage_bucket.media.name
