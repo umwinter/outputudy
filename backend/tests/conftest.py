@@ -25,7 +25,7 @@ def get_worker_id() -> str:
 
 
 @pytest_asyncio.fixture(scope="session")
-def event_loop():
+def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     """Create an instance of the default event loop for each test case."""
     loop = asyncio.new_event_loop()
     yield loop
