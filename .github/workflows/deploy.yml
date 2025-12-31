@@ -60,7 +60,7 @@ jobs:
           gcloud run jobs update outputudy-migration \
             --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:${{ github.sha }} \
             --region ${{ env.REGION }} \
-            --set-env-vars DATABASE_URL=postgresql+asyncpg://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy
+            --set-env-vars DATABASE_URL=postgresql+psycopg2://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy
 
       - name: Execute Migration
         run: |
