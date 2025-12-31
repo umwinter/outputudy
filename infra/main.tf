@@ -1,5 +1,4 @@
 resource "google_project_service" "apis" {
-  # Trigger CI
   for_each = toset([
     "run.googleapis.com",
     "compute.googleapis.com",
@@ -252,8 +251,8 @@ resource "google_cloud_run_v2_job" "migration" {
 
         env {
           name = "DATABASE_URL"
-          # Same connection string as backend
-          value = "postgresql+asyncpg://outputudy_user:${var.db_password}@${google_sql_database_instance.master.private_ip_address}/${var.app_name}"
+          # Use synchronous driver (psycopg2) for Alembic migrations
+          value = "postgresql+psycopg2://outputudy_user:${var.db_password}@${google_sql_database_instance.master.private_ip_address}/${var.app_name}"
         }
 
         # Override CMD to run migration
