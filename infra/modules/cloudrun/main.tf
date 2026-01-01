@@ -77,7 +77,7 @@ resource "google_cloud_run_v2_job" "migration" {
         env {
           name = "DATABASE_URL"
           # Use synchronous driver (psycopg2) for Alembic migrations
-          value = "postgresql+psycopg2://outputudy_user:${var.db_password}@${var.db_private_ip}/${var.app_name}"
+          value = "postgresql+asyncpg://outputudy_user:${var.db_password}@${var.db_private_ip}/${var.app_name}"
         }
 
         # Override CMD to run migration
