@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: .
 
     steps:
       - uses: actions/checkout@v4
@@ -25,33 +25,16 @@ jobs:
             sleep 2
           done
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
-          cache-dependency-path: backend/uv.lock
-
-      - name: Set up Python
-        run: uv python install 3.12
-
-      - name: Install dependencies
-        run: uv sync --all-extras --dev
-
-      - name: Lint with Ruff
+      - name: Run Tests & Lint
         run: |
-          uv run ruff check .
-          uv run ruff format --check .
-
-      - name: Type check with Basedpyright
-        run: uv run basedpyright .
-
-      - name: Run tests
-        run: uv run pytest -n auto
+          docker compose run --rm backend uv run ruff check .
+          docker compose run --rm backend uv run basedpyright .
+          docker compose run --rm backend uv run pytest -n auto
 
       - name: Check OpenAPI Schema Freshness
         run: |
-          DATABASE_URL="sqlite+aiosqlite:///:memory:" SECRET_KEY="check-secret" uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > ../frontend/src/types/openapi.json
-          git diff --exit-code ../frontend/src/types/openapi.json
+          docker compose run --rm -e DATABASE_URL="sqlite+aiosqlite:///:memory:" -e SECRET_KEY="check-secret" backend uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > frontend/src/types/openapi.json
+          git diff --exit-code frontend/src/types/openapi.json
 
   frontend:
     name: Frontend CI
