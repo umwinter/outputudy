@@ -19,7 +19,7 @@ jobs:
         run: |
           docker compose run --rm backend uv run ruff check .
           docker compose run --rm backend uv run basedpyright .
-          docker compose run --rm backend uv run pytest -n auto
+          docker compose run -e DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy --rm backend uv run pytest -n auto
 
       - name: Check OpenAPI Schema Freshness
         run: |
