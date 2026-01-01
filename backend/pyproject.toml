@@ -30,15 +30,14 @@ exclude = ["**/__pycache__", ".venv", "app/migrations"]
 minversion = "6.0"
 addopts = "-ra -q"
 pythonpath = ["."]
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 python_files = ["test_*.py"]
 asyncio_mode = "auto"
 env = [
     "SECRET_KEY=test_secret_key",
     "GCP_PROJECT_ID=test-project",
     "ENV=test",
+    "DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/outputudy",
 ]
 
 [project]
