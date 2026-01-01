@@ -22,6 +22,14 @@ resource "google_cloud_run_v2_service" "backend" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers[0].image
+    ]
+  }
 }
 
 resource "google_cloud_run_v2_service_iam_binding" "backend_noauth" {
@@ -44,6 +52,14 @@ resource "google_cloud_run_v2_service" "frontend" {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
       # In future, we will add ENV vars here (e.g. NEXT_PUBLIC_API_URL)
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers[0].image
+    ]
   }
 }
 
@@ -84,5 +100,13 @@ resource "google_cloud_run_v2_job" "migration" {
         command = ["alembic", "upgrade", "head"]
       }
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].template[0].containers[0].image
+    ]
   }
 }
