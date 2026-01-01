@@ -1,5 +1,6 @@
 services:
   frontend:
+    image: outputudy-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
@@ -36,6 +37,7 @@ services:
     command: /bin/sh -c "npm install -g pnpm && pnpm install --no-frozen-lockfile && npx playwright test"
 
   backend:
+    image: outputudy-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile.dev

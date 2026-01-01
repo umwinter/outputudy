@@ -31,13 +31,13 @@ jobs:
 
       - name: Run Tests & Lint
         run: |
-          docker compose run --no-build --rm backend uv run ruff check .
-          docker compose run --no-build --rm backend uv run basedpyright .
-          docker compose run --no-build -e DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy --rm backend uv run pytest -n auto
+          docker compose run --rm backend uv run ruff check .
+          docker compose run --rm backend uv run basedpyright .
+          docker compose run -e DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy --rm backend uv run pytest -n auto
 
       - name: Check OpenAPI Schema Freshness
         run: |
-          docker compose run --no-build --rm -e DATABASE_URL="sqlite+aiosqlite:///:memory:" -e SECRET_KEY="check-secret" backend uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > frontend/src/types/openapi.json
+          docker compose run --rm -e DATABASE_URL="sqlite+aiosqlite:///:memory:" -e SECRET_KEY="check-secret" backend uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > frontend/src/types/openapi.json
           git diff --exit-code frontend/src/types/openapi.json
 
   frontend:
@@ -65,9 +65,9 @@ jobs:
 
       - name: Run Tests & Lint
         run: |
-          docker compose run --no-build --rm frontend pnpm exec biome check .
-          docker compose run --no-build --rm frontend pnpm type-check
-          docker compose run --no-build --rm frontend pnpm test
+          docker compose run --rm frontend pnpm exec biome check .
+          docker compose run --rm frontend pnpm type-check
+          docker compose run --rm frontend pnpm test
 
   build-images:
     name: Build Images
