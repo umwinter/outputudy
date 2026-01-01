@@ -1,3 +1,3 @@
 FROM squidfunk/mkdocs-material
 
-RUN pip install mkdocs-swagger-ui-tag mkdocs-redoc-tag
+RUN pip install mkdocs-redoc-tag

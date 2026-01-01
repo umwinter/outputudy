@@ -1,15 +1,15 @@
-import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
+from app.core.config import settings
+
 # Secret key for JWT signing.
-# In production, use a secure secret from environment variables.
-SECRET_KEY = os.getenv("AUTH_SECRET", "supersecretkey")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 24 * 60  # 24 hours
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

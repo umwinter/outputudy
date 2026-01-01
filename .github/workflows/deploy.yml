@@ -26,14 +26,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Setup GCP
+        uses: ./.github/actions/setup-gcp
         with:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_SA_EMAIL }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
@@ -47,8 +44,8 @@ jobs:
       # --- Backend ---
       - name: Build Backend
         run: |
-          docker build -f ./backend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:${{ github.sha }} ./backend
-          docker build -f ./backend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:latest ./backend
+          docker build --cache-from type=gha --cache-to type=gha,mode=max -f ./backend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:${{ github.sha }} ./backend
+          docker build --cache-from type=gha --cache-to type=gha,mode=max -f ./backend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:latest ./backend
 
       - name: Push Backend
         run: |
@@ -76,15 +73,15 @@ jobs:
             DATABASE_URL=postgresql+asyncpg://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy
           # Note: DB_PASSWORD needs to be in Secrets (new one) or retrieved via Secret Manager in Code.
           # For now, we assume user adds DB_PASSWORD to GitHub Secrets.
-          # However, in main.tf we used a fixed password variable locally. 
-          # In CI, we should probably retrieve it or set it. 
+          # However, in main.tf we used a fixed password variable locally.
+          # In CI, we should probably retrieve it or set it.
           # Since user put everything in env, let's ask user.
 
       # --- Frontend ---
       - name: Build Frontend
         run: |
-          docker build -f ./frontend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/frontend:${{ github.sha }} ./frontend
-          docker build -f ./frontend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/frontend:latest ./frontend
+          docker build --cache-from type=gha --cache-to type=gha,mode=max -f ./frontend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/frontend:${{ github.sha }} ./frontend
+          docker build --cache-from type=gha --cache-to type=gha,mode=max -f ./frontend/Dockerfile.prd -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/frontend:latest ./frontend
 
       - name: Push Frontend
         run: |

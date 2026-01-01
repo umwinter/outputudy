@@ -1,0 +1,57 @@
+[tools]
+python = "3.12"
+node = "22.16.0"
+pnpm = "10.27.0"
+uv = "latest"
+
+[tasks.up]
+description = "Start all services (detached)"
+run = "docker-compose up -d"
+
+[tasks.down]
+description = "Stop and remove containers"
+run = "docker-compose down"
+
+[tasks.build]
+description = "Build/Rebuild services"
+run = "docker-compose up -d --build"
+
+[tasks.logs]
+description = "Tail logs for all services"
+run = "docker-compose logs -f"
+
+[tasks.backend-shell]
+description = "Enter backend container shell"
+run = "docker-compose exec backend /bin/bash"
+
+[tasks.test-backend]
+description = "Run backend tests"
+run = "docker-compose run --rm backend uv run pytest"
+
+[tasks.test-frontend]
+description = "Run frontend tests"
+run = "docker-compose run --rm frontend pnpm test"
+
+[tasks.test-e2e]
+description = "Run E2E tests (Playwright)"
+run = "docker-compose run --rm e2e"
+
+[tasks.lint]
+description = "Run linting (ruff, biome)"
+depends = ["lint:backend", "lint:frontend"]
+
+[tasks."lint:backend"]
+run = "docker-compose run --rm backend sh -c 'uv run ruff check . && uv run basedpyright .'"
+
+[tasks."lint:frontend"]
+run = "docker-compose run --rm frontend pnpm exec biome check ."
+
+[tasks.format]
+description = "Run formatting (ruff, biome)"
+depends = ["format:backend", "format:frontend"]
+
+[tasks."format:backend"]
+run = "docker-compose run --rm backend uv run ruff format ."
+
+[tasks."format:frontend"]
+run = "docker-compose run --rm frontend pnpm exec biome check --write ."

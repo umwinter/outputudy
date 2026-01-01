@@ -1,4 +1,4 @@
-# Backend Architecture
+# システム構成・アーキテクチャ
 
 本プロジェクトでは、**Simplified Clean Architecture** (軽量化されたレイヤードアーキテクチャ) を採用します。
 初期開発の速度と、将来的な保守性のバランスを考慮し、Service レイヤーを Usecase レイヤーに統合しています。

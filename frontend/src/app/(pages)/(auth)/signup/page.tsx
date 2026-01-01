@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { SignUpForm } from "@/components/auth/signup-form";
 import {
   Card,
   CardContent,
@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SignUpForm } from "@/components/auth/signup-form";
+import Link from "next/link";
 
 export default function SignUpPage() {
   return (

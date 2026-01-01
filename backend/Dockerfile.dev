@@ -1,4 +1,5 @@
 FROM python:3.12-slim
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
@@ -6,10 +7,15 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    curl \
+    ca-certificates \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Note: Source code is mounted via volume in docker-compose
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "8000"]
+CMD ["sh", "-c", "uv sync --frozen && granian --interface asgi --host 0.0.0.0 --port 8000 --reload app.main:app"]

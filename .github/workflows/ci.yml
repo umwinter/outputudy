@@ -10,64 +10,62 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: .
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-
-      - name: Install dependencies
+      - name: Run Tests & Lint
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          docker compose run --rm backend uv run ruff check .
+          docker compose run --rm backend uv run basedpyright .
+          docker compose run -e DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy --rm backend uv run pytest -n auto
 
-      - name: Lint with Ruff
+      - name: Check OpenAPI Schema Freshness
         run: |
-          ruff check .
-          ruff format --check .
-
-      - name: Type check with MyPy
-        run: mypy .
-
-      - name: Run tests
-        run: pytest -n auto
+          docker compose run --rm -e DATABASE_URL="sqlite+aiosqlite:///:memory:" -e SECRET_KEY="check-secret" backend uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > frontend/src/types/openapi.json
+          git diff --exit-code frontend/src/types/openapi.json
 
   frontend:
     name: Frontend CI
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: .
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Run Tests & Lint
+        run: |
+          docker compose run --rm frontend pnpm exec biome check .
+          docker compose run --rm frontend pnpm type-check
+          docker compose run --rm frontend pnpm test
+
+  build-images:
+    name: Build Images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Image
+        uses: docker/build-push-action@v6
         with:
-          version: 9
+          context: backend
+          file: backend/Dockerfile.prd
+          push: false
+          tags: umwinter/outputudy-backend:latest
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Build Frontend Image
+        uses: docker/build-push-action@v6
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Lint with ESLint
-        run: pnpm lint
-
-      - name: Format check with Prettier
-        run: pnpm exec prettier --check .
-
-      - name: Type check with TSC
-        run: pnpm type-check
-
-      - name: Run tests
-        run: pnpm test
+          context: frontend
+          file: frontend/Dockerfile.prd
+          push: false
+          tags: umwinter/outputudy-frontend:latest
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend

@@ -1,0 +1,55 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'doc/**'
+      - 'backend/app/**'
+      - '.github/workflows/deploy-docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "backend/pyproject.toml"
+
+      - name: Generate OpenAPI JSON
+        run: |
+          cd backend
+          uv run python scripts/export_openapi.py > ../doc/src/openapi.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install MkDocs and dependencies
+        run: |
+          python -m pip install mkdocs-material mkdocs-swagger-ui-tag mkdocs-redoc-tag
+
+      - name: Build MkDocs
+        run: |
+          cd doc
+          mkdocs build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/site

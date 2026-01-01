@@ -1,0 +1,46 @@
+export const siteConfig = {
+  name: "Outputudy",
+  description: "Your daily output study tracker.",
+  auth: {
+    login: {
+      title: "Sign In",
+      description: "Enter your email below to sign in to your account.",
+      submitButton: "Sign In",
+      submittingButton: "Signing In...",
+      forgotPassword: "Forgot your password?",
+      noAccount: "Don't have an account?",
+      signUp: "Sign Up",
+    },
+    register: {
+      title: "Create an account",
+      description: "Enter your details below to create your account.",
+      submitButton: "Sign Up",
+      submittingButton: "Creating account...",
+      alreadyHaveAccount: "Already have an account?",
+      signIn: "Sign In",
+    },
+    forgotPassword: {
+      title: "Forgot Password",
+      description: "Enter your email to receive a password reset link.",
+      submitButton: "Send Reset Link",
+      submittingButton: "Sending...",
+      successMessage: "If your email is registered, you will receive a reset link.",
+    },
+    resetPassword: {
+      title: "Reset password",
+      description: "Enter your new password below.",
+      submitButton: "Reset Password",
+      submittingButton: "Resetting...",
+      successMessage: "Password reset successfully! Redirecting to login...",
+      passwordLabel: "New Password",
+      confirmPasswordLabel: "Confirm New Password",
+    },
+  },
+  home: {
+    welcomePrefix: "Welcome, ",
+    welcomeSuffix: "!",
+    welcomeDefaultUser: "User",
+    loggedInAs: "You are logged in as: ",
+    signOutButton: "Sign Out",
+  },
+};

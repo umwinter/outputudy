@@ -1,11 +1,13 @@
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+import pytest
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.orm_models import UserORM
 from app.infrastructure.security import get_password_hash
 
 
-def test_login_success(client: TestClient, db_session: Session) -> None:
+@pytest.mark.asyncio
+async def test_login_success(client: AsyncClient, db_session: AsyncSession) -> None:
     # Setup test user
     password = "testpassword"
     user = UserORM(
@@ -14,10 +16,10 @@ def test_login_success(client: TestClient, db_session: Session) -> None:
         hashed_password=get_password_hash(password),
     )
     db_session.add(user)
-    db_session.commit()
+    await db_session.commit()
 
     # Test login
-    response = client.post(
+    response = await client.post(
         "/api/auth/login",
         json={"email": "test_router@example.com", "password": password},
     )
@@ -31,7 +33,10 @@ def test_login_success(client: TestClient, db_session: Session) -> None:
     assert data["token_type"] == "bearer"
 
 
-def test_login_wrong_password(client: TestClient, db_session: Session) -> None:
+@pytest.mark.asyncio
+async def test_login_wrong_password(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
     # Setup test user
     password = "testpassword"
     user = UserORM(
@@ -40,10 +45,10 @@ def test_login_wrong_password(client: TestClient, db_session: Session) -> None:
         hashed_password=get_password_hash(password),
     )
     db_session.add(user)
-    db_session.commit()
+    await db_session.commit()
 
     # Test login with wrong password
-    response = client.post(
+    response = await client.post(
         "/api/auth/login",
         json={"email": "wrong_pass@example.com", "password": "incorrect_password"},
     )
@@ -52,8 +57,9 @@ def test_login_wrong_password(client: TestClient, db_session: Session) -> None:
     assert response.json()["detail"] == "Invalid credentials"
 
 
-def test_login_nonexistent_user(client: TestClient) -> None:
-    response = client.post(
+@pytest.mark.asyncio
+async def test_login_nonexistent_user(client: AsyncClient) -> None:
+    response = await client.post(
         "/api/auth/login",
         json={"email": "nonexistent@example.com", "password": "any_password"},
     )
@@ -62,7 +68,10 @@ def test_login_nonexistent_user(client: TestClient) -> None:
     assert response.json()["detail"] == "Invalid credentials"
 
 
-def test_read_users_me_success(client: TestClient, db_session: Session) -> None:
+@pytest.mark.asyncio
+async def test_read_users_me_success(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
     # Setup test user
     password = "testpassword"
     user = UserORM(
@@ -71,30 +80,34 @@ def test_read_users_me_success(client: TestClient, db_session: Session) -> None:
         hashed_password=get_password_hash(password),
     )
     db_session.add(user)
-    db_session.commit()
+    await db_session.commit()
 
     # 1. Login to get token
-    login_res = client.post(
+    login_res = await client.post(
         "/api/auth/login",
         json={"email": "auth_me@example.com", "password": password},
     )
     token = login_res.json()["access_token"]
 
     # 2. Access /me with token
-    response = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    response = await client.get(
+        "/api/auth/me", headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == "auth_me@example.com"
     assert data["name"] == "Auth User"
 
 
-def test_read_users_me_unauthorized(client: TestClient) -> None:
-    response = client.get("/api/auth/me")
+@pytest.mark.asyncio
+async def test_read_users_me_unauthorized(client: AsyncClient) -> None:
+    response = await client.get("/api/auth/me")
     assert response.status_code == 401
 
 
-def test_register_success(client: TestClient, db_session: Session) -> None:
-    response = client.post(
+@pytest.mark.asyncio
+async def test_register_success(client: AsyncClient, db_session: AsyncSession) -> None:
+    response = await client.post(
         "/api/auth/register",
         json={
             "name": "New User",
@@ -109,7 +122,10 @@ def test_register_success(client: TestClient, db_session: Session) -> None:
     assert "access_token" in data
 
 
-def test_register_duplicate_email(client: TestClient, db_session: Session) -> None:
+@pytest.mark.asyncio
+async def test_register_duplicate_email(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
     # Setup existing user
     user = UserORM(
         name="Existing User",
@@ -117,9 +133,9 @@ def test_register_duplicate_email(client: TestClient, db_session: Session) -> No
         hashed_password=get_password_hash("password"),
     )
     db_session.add(user)
-    db_session.commit()
+    await db_session.commit()
 
-    response = client.post(
+    response = await client.post(
         "/api/auth/register",
         json={
             "name": "New User",
@@ -131,7 +147,10 @@ def test_register_duplicate_email(client: TestClient, db_session: Session) -> No
     assert response.json()["detail"] == "Email already registered"
 
 
-def test_forgot_password_success(client: TestClient, db_session: Session) -> None:
+@pytest.mark.asyncio
+async def test_forgot_password_success(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
     # Setup test user
     user = UserORM(
         name="Forgot User",
@@ -139,9 +158,9 @@ def test_forgot_password_success(client: TestClient, db_session: Session) -> Non
         hashed_password=get_password_hash("password"),
     )
     db_session.add(user)
-    db_session.commit()
+    await db_session.commit()
 
-    response = client.post(
+    response = await client.post(
         "/api/auth/forgot-password",
         json={"email": "forgot@example.com"},
     )
@@ -149,29 +168,33 @@ def test_forgot_password_success(client: TestClient, db_session: Session) -> Non
     assert "receive a reset link" in response.json()["detail"]
 
 
-def test_reset_password_success(client: TestClient, db_session: Session) -> None:
-    # Setup test user
-    user = UserORM(
-        name="Reset User",
-        email="reset@example.com",
-        id=999,
-        hashed_password=get_password_hash("oldpassword"),
-    )
-    db_session.add(user)
-    db_session.commit()
-
-    # Reset token is a JWT with type="password_reset" and sub=user_id.
-    # We can use the security infrastructure or just mock/generate it.
+@pytest.mark.asyncio
+async def test_reset_password_success(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
+    import uuid
     from datetime import timedelta
 
     from app.infrastructure.security import create_access_token
 
+    user_id = uuid.uuid4()
+    # Setup test user
+    user = UserORM(
+        name="Reset User",
+        email="reset@example.com",
+        id=user_id,
+        hashed_password=get_password_hash("oldpassword"),
+    )
+    db_session.add(user)
+    await db_session.commit()
+
+    # Reset token is a JWT with type="password_reset" and sub=user_id.
     token = create_access_token(
-        data={"sub": "999", "type": "password_reset"},
+        data={"sub": str(user_id), "type": "password_reset"},
         expires_delta=timedelta(minutes=15),
     )
 
-    response = client.post(
+    response = await client.post(
         "/api/auth/reset-password",
         json={"token": token, "new_password": "newpassword456"},
     )
@@ -179,7 +202,7 @@ def test_reset_password_success(client: TestClient, db_session: Session) -> None
     assert response.json()["detail"] == "Password has been reset successfully."
 
     # Verify login with new password
-    login_res = client.post(
+    login_res = await client.post(
         "/api/auth/login",
         json={"email": "reset@example.com", "password": "newpassword456"},
     )

@@ -34,15 +34,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
+      - name: Setup GCP & Terraform
+        uses: ./.github/actions/setup-gcp
         with:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_SA_EMAIL }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+          setup_terraform: 'true'
 
       - name: Wake up Cloud SQL (if stopped)
         run: |
@@ -67,7 +64,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
         continue-on-error: true
-      
+
       # Comment Plan on PR
       - name: Update PR
         uses: actions/github-script@v7

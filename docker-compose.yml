@@ -13,6 +13,27 @@ services:
       - NODE_ENV=development
       - AUTH_SECRET=${AUTH_SECRET}
     tty: true
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules
+            - .next
+        - action: rebuild
+          path: ./frontend/package.json
+
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    environment:
+      - CI=true
+    depends_on:
+      - frontend
+    command: /bin/sh -c "npm install -g pnpm && pnpm install --no-frozen-lockfile && npx playwright test"
 
   backend:
     build:
@@ -22,12 +43,24 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
+      - backend_venv:/app/.venv
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/outputudy
+      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=outputudy
       - AUTH_SECRET=${AUTH_SECRET}
+      - SECRET_KEY=${AUTH_SECRET:-supersecretkey}
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - .venv
+            - __pycache__
+        - action: rebuild
+          path: ./backend/pyproject.toml
     depends_on:
       db:
         condition: service_healthy
@@ -75,7 +108,8 @@ services:
     ports:
       - "${DOC_PORT:-8001}:8000"
     volumes:
-      - ./doc:/docs
+      - ./doc:/docsß
+    command: serve -a 0.0.0.0:8000 --livereload
 
   dozzle:
     image: amir20/dozzle
@@ -93,6 +127,7 @@ services:
     profiles: [ "tools" ]
     volumes:
       - ./backend:/app
+      - /app/.venv
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/outputudy
     depends_on:
@@ -102,4 +137,5 @@ services:
 
 volumes:
   postgres_data:
+  backend_venv:
   mailpit_data:

@@ -1,25 +1,27 @@
-import os
-from collections.abc import Generator
-from typing import TYPE_CHECKING
+from collections.abc import AsyncGenerator
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase
 
-if TYPE_CHECKING:
+from app.core.config import settings
+
+
+class Base(DeclarativeBase):
     pass
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db:5432/outputudy")
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Database connection URL
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
-Base = declarative_base()
+# Create Async Engine
+async_engine = create_async_engine(
+    SQLALCHEMY_DATABASE_URL, echo=(settings.ENV == "development")
+)
+AsyncSessionLocal = async_sessionmaker(
+    bind=async_engine, class_=AsyncSession, expire_on_commit=False
+)
 
 
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        yield session

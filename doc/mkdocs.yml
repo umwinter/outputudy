@@ -1,6 +1,20 @@
 site_name: Outputudy Documentation
 docs_dir: src
 site_dir: site
+repo_url: https://github.com/umwinter/outputudy/settings/pages
+repo_name: umwinter/outputudy
+
+theme:
+  name: material
+  features:
+    - toc.integrate
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+
+plugins:
+  - redoc-tag
+  - search
 
 nav:
   - Home: index.md
@@ -8,13 +22,26 @@ nav:
   - Architecture: architecture.md
   - Workflow: workflow.md
   - Testing: testing.md
-  - API (Swagger): api.md
-  - API (ReDoc): api_redoc.md
+  - API Reference: api_redoc.md
 
-theme:
-  name: material
 
-plugins:
-  - swagger-ui-tag
-  - redoc-tag
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
 
+extra_css:
+  - https://unpkg.com/mermaid@8.0.0/dist/mermaid.css
+
+extra_javascript:
+  - https://unpkg.com/mermaid@8.0.0/dist/mermaid.min.js
