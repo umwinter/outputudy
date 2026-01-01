@@ -15,15 +15,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Cache Backend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile.dev
+          push: false
+          load: true
+          tags: outputudy-backend:latest
+          cache-from: type=gha,scope=backend-dev
+          cache-to: type=gha,mode=max,scope=backend-dev
+
       - name: Run Tests & Lint
         run: |
-          docker compose run --rm backend uv run ruff check .
-          docker compose run --rm backend uv run basedpyright .
-          docker compose run -e DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy --rm backend uv run pytest -n auto
+          docker compose run --no-build --rm backend uv run ruff check .
+          docker compose run --no-build --rm backend uv run basedpyright .
+          docker compose run --no-build -e DATABASE_URL=postgresql+asyncpg://user:password@db:5432/outputudy --rm backend uv run pytest -n auto
 
       - name: Check OpenAPI Schema Freshness
         run: |
-          docker compose run --rm -e DATABASE_URL="sqlite+aiosqlite:///:memory:" -e SECRET_KEY="check-secret" backend uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > frontend/src/types/openapi.json
+          docker compose run --no-build --rm -e DATABASE_URL="sqlite+aiosqlite:///:memory:" -e SECRET_KEY="check-secret" backend uv run python -c "from app.main import app; import json; print(json.dumps(app.openapi()))" > frontend/src/types/openapi.json
           git diff --exit-code frontend/src/types/openapi.json
 
   frontend:
@@ -35,11 +49,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Cache Frontend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          file: frontend/Dockerfile.dev
+          push: false
+          load: true
+          tags: outputudy-frontend:latest
+          cache-from: type=gha,scope=frontend-dev
+          cache-to: type=gha,mode=max,scope=frontend-dev
+
       - name: Run Tests & Lint
         run: |
-          docker compose run --rm frontend pnpm exec biome check .
-          docker compose run --rm frontend pnpm type-check
-          docker compose run --rm frontend pnpm test
+          docker compose run --no-build --rm frontend pnpm exec biome check .
+          docker compose run --no-build --rm frontend pnpm type-check
+          docker compose run --no-build --rm frontend pnpm test
 
   build-images:
     name: Build Images
