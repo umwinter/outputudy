@@ -34,12 +34,3 @@ resource "google_iam_workload_identity_pool_provider" "provider" {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }
 }
-
-# 5. Allow GitHub Actions (from specific repo) to impersonate the Service Account
-resource "google_service_account_iam_member" "workload_identity_user" {
-  service_account_id = google_service_account.github_actions.name
-  role               = "roles/iam.workloadIdentityUser"
-
-  # Limit access to this specific repository
-  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
-}
