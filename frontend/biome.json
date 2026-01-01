@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [".next", "node_modules", "src/lib/api-client"]
+    "ignore": [".next", "node_modules", "src/lib/api-client", "src/types/openapi.json"]
   },
   "formatter": {
     "enabled": true,
