@@ -7,6 +7,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    nodejs \
+    npm \
+    wget \
+    ca-certificates \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./
@@ -15,4 +20,4 @@ RUN uv sync --frozen
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Note: Source code is mounted via volume in docker-compose
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "8000"]
+CMD ["sh", "-c", "uv sync --frozen && granian --interface asgi --host 0.0.0.0 --port 8000 --reload app.main:app"]

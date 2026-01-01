@@ -1,0 +1,86 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "🚀 root"
+		},
+		{
+			"path": "frontend",
+			"name": "🎨 frontend"
+		},
+		{
+			"path": "backend",
+			"name": "⚙️ backend"
+		},
+		{
+			"path": "doc",
+			"name": "📄 doc"
+		}
+	],
+	"settings": {
+		// --- Python & Basedpyright ---
+		"python.defaultInterpreterPath": "${workspaceFolder:backend}/.venv/bin/python",
+		"python.languageServer": "None", // Disable Pylance to use Basedpyright
+		"basedpyright.analysis.typeCheckingMode": "basic",
+		"[python]": {
+			"editor.defaultFormatter": "charliermarsh.ruff",
+			"editor.codeActionsOnSave": {
+				"source.organizeImports.ruff": "always",
+				"source.fixAll.ruff": "always"
+			},
+			"editor.formatOnSave": true
+		},
+
+		// --- Frontend & Biome ---
+		"biome.enabled": true,
+		"[javascript]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[typescript]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[typescriptreact]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[json]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[jsonc]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+
+		// --- General Editor Settings ---
+		"editor.formatOnSave": true,
+		"editor.bracketPairColorization.enabled": true,
+		"editor.guides.bracketPairs": "active",
+		"files.insertFinalNewline": true,
+		"files.trimTrailingWhitespace": true,
+
+		// --- Search & Watcher Exclusions ---
+		"files.watcherExclude": {
+			"**/.venv/**": true,
+			"**/node_modules/**": true,
+			"**/.next/**": true,
+			"**/__pycache__/**": true,
+			"**/.ruff_cache/**": true,
+			"**/.pytest_cache/**": true
+		},
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/bower_components": true,
+			"**/.next": true,
+			"**/.venv": true,
+			"**/__pycache__": true
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.python",
+			"detachhead.basedpyright",
+			"tamasfe.even-better-toml",
+			"biomejs.biome",
+			"charliermarsh.ruff",
+			"github.vscode-github-actions"
+		]
+	}
+}

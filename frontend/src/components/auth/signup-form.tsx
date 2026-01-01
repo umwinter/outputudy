@@ -1,13 +1,13 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
+import { register } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -16,7 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { register } from "@/actions/auth";
+import { Input } from "@/components/ui/input";
 import { siteConfig } from "@/config/site";
 
 const formSchema = z
@@ -124,7 +124,6 @@ export function SignUpForm() {
             </FormItem>
           )}
         />
-
 
         {error && <div className="text-destructive text-sm font-medium">{error}</div>}
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>

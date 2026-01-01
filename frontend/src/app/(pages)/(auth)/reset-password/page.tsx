@@ -1,9 +1,10 @@
-
 "use client";
 
-import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
+import { ResetPasswordForm } from "@/components/auth/reset-password-form";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,8 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 
 function ResetPasswordPageContent() {
   const router = useRouter();

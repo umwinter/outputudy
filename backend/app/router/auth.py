@@ -36,7 +36,23 @@ def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
     return AuthService(repo, email_service)
 
 
-@router.post("/login", response_model=LoginResponse, operation_id="login")
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    responses={
+        200: {
+            "model": LoginResponse,
+            "description": "ログイン成功。トークンを返します。",
+        },
+        401: {
+            "model": MessageResponse,
+            "description": "認証失敗（メールアドレスまたはパスワードが正しくありません）",
+        },
+    },
+    operation_id="login",
+    summary="ログイン",
+    description="メールアドレスとパスワードを使用してログインし、アクセストークンを取得します。",
+)
 async def login(
     request: LoginRequest, service: AuthService = Depends(get_auth_service)
 ) -> LoginResponse:
@@ -54,7 +70,20 @@ async def login(
     )
 
 
-@router.get("/me", response_model=LoginResponse, operation_id="get_current_user")
+@router.get(
+    "/me",
+    response_model=LoginResponse,
+    responses={
+        200: {"model": LoginResponse, "description": "現在のユーザー情報を返します。"},
+        401: {
+            "model": MessageResponse,
+            "description": "未認証（トークンが無効または有効期限切れです）",
+        },
+    },
+    operation_id="get_current_user",
+    summary="現在ログイン中のユーザー情報",
+    description="トークンを使用して、現在認証されているユーザーのプロファイル情報を取得します。",
+)
 async def read_users_me(
     current_user: UserDomain = Depends(get_current_user),
 ) -> LoginResponse:
@@ -66,7 +95,23 @@ async def read_users_me(
     )
 
 
-@router.post("/register", response_model=LoginResponse, operation_id="register")
+@router.post(
+    "/register",
+    response_model=LoginResponse,
+    responses={
+        200: {
+            "model": LoginResponse,
+            "description": "登録成功。自動的にログインされ、トークンが返されます。",
+        },
+        400: {
+            "model": MessageResponse,
+            "description": "バリデーションエラー（メールアドレスの重複など）",
+        },
+    },
+    operation_id="register",
+    summary="ユーザー新規登録",
+    description="新しいユーザーアカウントを作成し、自動的にログインしてトークンを返します。",
+)
 async def register(
     request: RegisterRequest, service: AuthService = Depends(get_auth_service)
 ) -> LoginResponse:
@@ -88,7 +133,11 @@ async def register(
 
 
 @router.post(
-    "/forgot-password", response_model=MessageResponse, operation_id="forgot_password"
+    "/forgot-password",
+    response_model=MessageResponse,
+    operation_id="forgot_password",
+    summary="パスワードリセット要求",
+    description="登録されたメールアドレスにパスワードリセット用のリンク（トークン）を送信します。",
 )
 async def forgot_password(
     request: ForgotPasswordRequest, service: AuthService = Depends(get_auth_service)
@@ -100,7 +149,17 @@ async def forgot_password(
 
 
 @router.post(
-    "/reset-password", response_model=MessageResponse, operation_id="reset_password"
+    "/reset-password",
+    response_model=MessageResponse,
+    responses={
+        400: {
+            "model": MessageResponse,
+            "description": "トークンが無効または期限切れです",
+        },
+    },
+    operation_id="reset_password",
+    summary="パスワードリセット実行",
+    description="リセットトークンを使用して、新しいパスワードを設定します。",
 )
 async def reset_password(
     request: ResetPasswordRequest, service: AuthService = Depends(get_auth_service)

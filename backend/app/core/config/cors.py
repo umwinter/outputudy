@@ -6,7 +6,11 @@ from .base import BaseConfig
 class CorsSettings(BaseConfig):
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8080"],
+        default=[
+            "http://localhost:3000",
+            "http://localhost:8080",
+            "http://localhost:8001",
+        ],
         description="List of origins allowed for CORS",
     )
 

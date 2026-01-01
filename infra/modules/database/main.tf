@@ -19,7 +19,7 @@ resource "google_sql_database_instance" "master" {
     disk_type       = "PD_HDD"
   }
 
-  deletion_protection = false
+  deletion_protection = true
 
   depends_on = [
     var.private_vpc_connection

@@ -31,8 +31,8 @@ jobs:
           uv run ruff check .
           uv run ruff format --check .
 
-      - name: Type check with MyPy
-        run: uv run mypy .
+      - name: Type check with Basedpyright
+        run: uv run basedpyright .
 
       - name: Run tests
         run: uv run pytest -n auto
@@ -54,23 +54,20 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      - name: Lint with ESLint
-        run: pnpm lint
-
-      - name: Format check with Prettier
-        run: pnpm exec prettier --check .
+      - name: Check with Biome
+        run: pnpm exec biome check .
 
       - name: Type check with TSC
         run: pnpm type-check

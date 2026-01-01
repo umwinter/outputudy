@@ -1,8 +1,8 @@
 "use server";
 
 import { signIn } from "@/auth";
+import { ApiError, AuthService } from "@/lib/api";
 import { AuthError } from "next-auth";
-import { AuthService, ApiError } from "@/lib/api";
 
 export async function login(values: { email: string; password: string }) {
   try {

@@ -1,8 +1,8 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach, type Mock } from "vitest";
-import { LoginForm } from "./login-form";
 import { login } from "@/actions/auth";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import { type Mock, beforeEach, describe, expect, it, vi } from "vitest";
+import { LoginForm } from "./login-form";
 
 // Mock the external dependencies
 vi.mock("next/navigation", () => ({
