@@ -16,9 +16,15 @@ resource "google_cloud_run_v2_service" "backend" {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
 
+        action = "deny"
+      }
       env {
         name  = "DATABASE_URL"
         value = "postgresql+asyncpg://outputudy_user:${var.db_password}@${var.db_private_ip}/${var.app_name}"
+      }
+      env {
+        name  = "SECRET_KEY"
+        value = var.secret_key
       }
     }
   }
@@ -94,6 +100,10 @@ resource "google_cloud_run_v2_job" "migration" {
           name = "DATABASE_URL"
           # Use synchronous driver (psycopg2) for Alembic migrations
           value = "postgresql+asyncpg://outputudy_user:${var.db_password}@${var.db_private_ip}/${var.app_name}"
+        }
+        env {
+          name  = "SECRET_KEY"
+          value = var.secret_key
         }
 
         # Override CMD to run migration

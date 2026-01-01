@@ -102,6 +102,7 @@ module "cloudrun" {
   network_name  = module.networking.network_name
   subnet_name   = module.networking.subnet_name
   db_private_ip = module.database.private_ip_address
+  secret_key    = var.secret_key
 
   depends_on = [module.database, module.networking]
 }

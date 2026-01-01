@@ -20,6 +20,7 @@ permissions:
 env:
   TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
   TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+  TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
   # Other defaults (region, app_name) are fine. db_activation_policy defaults to ALWAYS.
 
 jobs:

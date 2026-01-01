@@ -26,3 +26,9 @@ variable "db_activation_policy" {
   type        = string
   default     = "ALWAYS"
 }
+
+variable "secret_key" {
+  description = "The secret key for the application"
+  type        = string
+  sensitive   = true
+}

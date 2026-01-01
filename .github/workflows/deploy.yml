@@ -57,7 +57,7 @@ jobs:
           gcloud run jobs update outputudy-migration \
             --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/backend:${{ github.sha }} \
             --region ${{ env.REGION }} \
-            --set-env-vars DATABASE_URL=postgresql+asyncpg://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy
+            --set-env-vars DATABASE_URL=postgresql+asyncpg://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy,SECRET_KEY=${{ secrets.SECRET_KEY }}
 
       - name: Execute Migration
         run: |
@@ -71,6 +71,7 @@ jobs:
           region: ${{ env.REGION }}
           env_vars: |
             DATABASE_URL=postgresql+asyncpg://outputudy_user:${{ secrets.DB_PASSWORD }}@${{ env.DB_IP }}/outputudy
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
           # Note: DB_PASSWORD needs to be in Secrets (new one) or retrieved via Secret Manager in Code.
           # For now, we assume user adds DB_PASSWORD to GitHub Secrets.
           # However, in main.tf we used a fixed password variable locally.

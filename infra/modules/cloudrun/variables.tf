@@ -26,3 +26,8 @@ variable "subnet_name" {
 variable "db_private_ip" {
   type = string
 }
+
+variable "secret_key" {
+  type      = string
+  sensitive = true
+}
