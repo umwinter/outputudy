@@ -37,7 +37,7 @@ env = [
     "SECRET_KEY=test_secret_key",
     "GCP_PROJECT_ID=test-project",
     "ENV=test",
-    "DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/outputudy",
+    "D:DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/outputudy",
 ]
 
 [project]
