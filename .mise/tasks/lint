@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Run all linters (monorepo)"
-mise run //backend:lint //frontend:lint

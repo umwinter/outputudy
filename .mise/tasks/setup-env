@@ -1,8 +1,0 @@
-#!/bin/bash
-#MISE description="Create .env from .env.example if missing"
-if [ ! -f .env ]; then
-    cp .env.example .env
-    echo "✅ .env created."
-else
-    echo "✅ .env already exists."
-fi

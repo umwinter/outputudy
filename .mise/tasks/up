@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Start all services (detached)"
-docker-compose up -d

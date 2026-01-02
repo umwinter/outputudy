@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Build/Rebuild services"
-docker-compose up -d --build

@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Run all formatters (monorepo)"
-mise run //backend:format //frontend:format

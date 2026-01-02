@@ -1,4 +1,0 @@
-#!/bin/bash
-#MISE description="Full project setup (Local)"
-#MISE depends=["setup-env", "setup-hooks", "setup-db"]
-echo "✨ Setup complete! Access: http://localhost:3000"
