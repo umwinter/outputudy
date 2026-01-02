@@ -61,9 +61,14 @@ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
 ### フロントエンド公開設定 (Public Access)
 Cloud Runのフロントエンドをインターネット公開（未認証アクセス許可）にします。
 
-```bash
-gcloud run services add-iam-policy-binding "${APP_NAME}-frontend" \
-  --region="asia-northeast1" \
-  --member="allUsers" \
-  --role="roles/run.invoker"
+```bash# フロントエンド・バックエンドの公開設定 (未認証アクセス許可)
+# ※ APIをクライアントから直接呼ぶ場合、バックエンドも公開が必要です。
+SERVICE_NAMES=("${APP_NAME}-frontend" "${APP_NAME}-backend")
+
+for SERVICE in "${SERVICE_NAMES[@]}"; do
+  gcloud run services add-iam-policy-binding "${SERVICE}" \
+    --region="asia-northeast1" \
+    --member="allUsers" \
+    --role="roles/run.invoker"
+done
 ```

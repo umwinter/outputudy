@@ -37,14 +37,7 @@ resource "google_cloud_run_v2_service" "backend" {
   }
 }
 
-resource "google_cloud_run_v2_service_iam_binding" "backend_noauth" {
-  location = google_cloud_run_v2_service.backend.location
-  name     = google_cloud_run_v2_service.backend.name
-  role     = "roles/run.invoker"
-  members = [
-    "allUsers"
-  ]
-}
+
 
 # Cloud Run (Frontend)
 resource "google_cloud_run_v2_service" "frontend" {
