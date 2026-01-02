@@ -1,0 +1,3 @@
+#!/bin/bash
+#MISE description="Run all tests (monorepo)"
+mise run //backend:test //frontend:test

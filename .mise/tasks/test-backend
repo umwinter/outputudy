@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Run backend tests"
-docker-compose run --rm backend uv run pytest

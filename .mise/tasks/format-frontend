@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Format frontend code"
-docker-compose run --rm frontend pnpm exec biome check --write .

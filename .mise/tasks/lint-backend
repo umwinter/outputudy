@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Lint backend code"
-docker-compose run --rm backend sh -c 'export UV_LINK_MODE=copy && uv run ruff check . && uv run basedpyright .'

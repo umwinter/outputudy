@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Run E2E tests (Playwright)"
-docker-compose run --rm e2e

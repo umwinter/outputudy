@@ -1,5 +1,11 @@
+experimental_monorepo_root = true
+
 [tools]
 python = "3.12"
 node = "22.16.0"
 pnpm = "10.27.0"
 uv = "latest"
+
+[env]
+# Required for monorepo features
+MISE_EXPERIMENTAL = "1"
