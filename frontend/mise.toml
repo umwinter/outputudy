@@ -1,0 +1,11 @@
+[tasks.lint]
+description = "Lint frontend code"
+run = "docker-compose -f ../docker-compose.yml run --rm frontend pnpm exec biome check ."
+
+[tasks.format]
+description = "Format frontend code"
+run = "docker-compose -f ../docker-compose.yml run --rm frontend pnpm exec biome check --write ."
+
+[tasks.test]
+description = "Run frontend tests"
+run = "docker-compose -f ../docker-compose.yml run --rm frontend pnpm test"

@@ -1,3 +1,0 @@
-#!/bin/bash
-#MISE description="Format backend code"
-docker-compose -f ../docker-compose.yml run --rm backend uv run ruff format .
