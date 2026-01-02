@@ -72,23 +72,6 @@ depends = [
 ]
 run = "echo '🎉 GCP Bootstrap Completed!'"
 
-[tasks."bootstrap-gcp:config"]
-description = "Load GCP Configuration"
-quiet = true
-run = '''
-# Load .env if exists
-if [ -f ".env" ]; then
-    export $(grep -v '^#' .env | xargs)
-elif [ -f "../.env" ]; then
-    export $(grep -v '^#' ../.env | xargs)
-fi
-# Export for subsequent tasks if run in same shell, though mise runs in subshells mostly.
-# We might need to duplicate config loading or use a separate script if vars are needed across tasks.
-# For now, we assume tasks are self-contained or load config themselves.
-# Actually, mise doesn't persist env vars across tasks unless defined in [env] or exported in a parent task running them.
-# So we will repeat the config loading block or assume [env] handles static ones.
-# Dynamic ones like PROJECT_ID specific to user might need .env loading in each task.
-'''
 
 [tasks."bootstrap-gcp:api"]
 description = "Enable required GCP APIs"
@@ -198,12 +181,12 @@ fi
 
 [tasks.lint]
 description = "Run all linters (monorepo)"
-run = "mise run //backend:lint //frontend:lint"
+depends = ["//backend:lint", "//frontend:lint"]
 
 [tasks.format]
 description = "Run all formatters (monorepo)"
-run = "mise run //backend:format //frontend:format"
+depends = ["//backend:format", "//frontend:format"]
 
 [tasks.test]
 description = "Run all tests (monorepo)"
-run = "mise run //backend:test //frontend:test"
+depends = ["//backend:test", "//frontend:test"]

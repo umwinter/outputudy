@@ -1,14 +1,14 @@
 [tasks.lint]
 description = "Lint backend code"
-run = "docker-compose -f ../docker-compose.yml run --rm backend sh -c 'export UV_LINK_MODE=copy && uv run ruff check . && uv run basedpyright .'"
+run = "uv run ruff check . && uv run basedpyright ."
 
 [tasks.format]
 description = "Format backend code"
-run = "docker-compose -f ../docker-compose.yml run --rm backend uv run ruff format ."
+run = "uv run ruff format ."
 
 [tasks.test]
 description = "Run backend tests"
-run = "docker-compose -f ../docker-compose.yml run --rm backend uv run pytest"
+run = "uv run pytest"
 
 [tasks.shell]
 description = "Enter backend container shell"
