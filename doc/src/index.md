@@ -9,7 +9,7 @@
 - **UI Library**: shadcn/ui
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Version Management**: Volta (Node.js)
+- **Version Management**: mise (Node.js)
 
 ### Backend
 - **Framework**: FastAPI
