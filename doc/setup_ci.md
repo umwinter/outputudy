@@ -16,7 +16,7 @@ Terraformで管理できない「権限自体の管理」や「初期ブート�
 gcloud auth login
 
 # セットアップスクリプト実行
-bash scripts/setup_gcp.sh
+mise run setup-gcp
 ```
 
 ---
