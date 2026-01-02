@@ -68,14 +68,7 @@ resource "google_cloud_run_v2_service" "frontend" {
   }
 }
 
-resource "google_cloud_run_v2_service_iam_binding" "frontend_noauth" {
-  location = google_cloud_run_v2_service.frontend.location
-  name     = google_cloud_run_v2_service.frontend.name
-  role     = "roles/run.invoker"
-  members = [
-    "allUsers"
-  ]
-}
+
 
 # Cloud Run Job (DB Migration)
 resource "google_cloud_run_v2_job" "migration" {
