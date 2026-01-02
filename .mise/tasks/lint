@@ -1,0 +1,4 @@
+#!/bin/bash
+#MISE description="Run all linters"
+#MISE depends=["lint-backend", "lint-frontend"]
+echo "✅ All linting passed."

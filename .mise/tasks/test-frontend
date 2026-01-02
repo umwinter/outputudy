@@ -1,0 +1,3 @@
+#!/bin/bash
+#MISE description="Run frontend tests"
+docker-compose run --rm frontend pnpm test

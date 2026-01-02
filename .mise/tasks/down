@@ -1,0 +1,3 @@
+#!/bin/bash
+#MISE description="Stop and remove containers"
+docker-compose down

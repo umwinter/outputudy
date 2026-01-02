@@ -1,0 +1,4 @@
+#!/bin/bash
+#MISE description="Run all formatters"
+#MISE depends=["format-backend", "format-frontend"]
+echo "✅ All formatting complete."

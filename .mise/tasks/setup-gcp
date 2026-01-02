@@ -1,4 +1,5 @@
 #!/bin/bash
+#MISE description="GCP/CI Environment Setup"
 set -e
 
 # --- Configuration ---
