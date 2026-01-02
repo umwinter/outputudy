@@ -48,6 +48,13 @@ gcloud iam service-accounts add-iam-policy-binding "${SA_EMAIL}" \
 gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --member="serviceAccount:${SA_EMAIL}" \
   --role="roles/editor"
+
+# Cloud Scheduler用サービスアカウントへの権限付与
+# (DB停止などのためにCloud SQL Admin権限が必要)
+SCHEDULER_SA="${APP_NAME}-scheduler-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member="serviceAccount:${SCHEDULER_SA}" \
+  --role="roles/cloudsql.admin"
 ```
 
 ## 確認方法

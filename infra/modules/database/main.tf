@@ -43,11 +43,7 @@ resource "google_service_account" "scheduler_sa" {
   display_name = "Cloud Scheduler Service Account"
 }
 
-resource "google_project_iam_member" "scheduler_sql_admin" {
-  project = var.project_id
-  role    = "roles/cloudsql.admin" # Required to stop instance
-  member  = "serviceAccount:${google_service_account.scheduler_sa.email}"
-}
+
 
 # Cloud Scheduler to Stop DB (Every 4 hours)
 resource "google_cloud_scheduler_job" "db_stopper" {
