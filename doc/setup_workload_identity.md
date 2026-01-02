@@ -37,11 +37,17 @@ POOL_NAME="github-actions-pool" # Terraformで設定した名前
 # サービスアカウントのメールアドレス
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
-# IAMポリシーバインディングの追加
+# IAMポリシーバインディングの追加 (Workload Identity)
 gcloud iam service-accounts add-iam-policy-binding "${SA_EMAIL}" \
   --project="${PROJECT_ID}" \
   --role="roles/iam.workloadIdentityUser" \
   --member="principalSet://iam.googleapis.com/projects/$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')/locations/global/workloadIdentityPools/${POOL_NAME}/attribute.repository/${GITHUB_REPO}"
+
+# プロジェクト編集者権限の付与 (Terraform実行用)
+# ※ これがないとTerraformでリソースを作成できません
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member="serviceAccount:${SA_EMAIL}" \
+  --role="roles/editor"
 ```
 
 ## 確認方法

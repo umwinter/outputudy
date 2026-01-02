@@ -4,12 +4,7 @@ resource "google_service_account" "github_actions" {
   display_name = "Service Account for GitHub Actions"
 }
 
-# 2. Grant Editor role to the Service Account (to manage infra)
-resource "google_project_iam_member" "github_actions_editor" {
-  project = var.project_id
-  role    = "roles/editor" # Strong permission for Terraform Apply
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
-}
+
 
 # 3. Workload Identity Pool
 resource "google_iam_workload_identity_pool" "pool" {
