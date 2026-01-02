@@ -105,3 +105,23 @@ resource "google_cloud_run_v2_job" "migration" {
     ]
   }
 }
+
+# Allow public access to Backend (RESTORED)
+resource "google_cloud_run_service_iam_binding" "backend_noauth" {
+  location = var.region
+  service  = google_cloud_run_v2_service.backend.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}
+
+# Allow public access to Frontend (RESTORED)
+resource "google_cloud_run_service_iam_binding" "frontend_noauth" {
+  location = var.region
+  service  = google_cloud_run_v2_service.frontend.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}

@@ -69,3 +69,10 @@ resource "google_cloud_scheduler_job" "db_stopper" {
     }
   }
 }
+
+# Grant Cloud SQL Admin role to Scheduler SA (RESTORED)
+resource "google_project_iam_member" "scheduler_sql_admin" {
+  project = var.project_id
+  role    = "roles/cloudsql.admin"
+  member  = "serviceAccount:${google_service_account.scheduler_sa.email}"
+}
